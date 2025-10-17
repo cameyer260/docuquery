@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+📘 DocuQuery
 
-## Getting Started
+DocuQuery is an AI-powered document question-and-answer chatbot built with Retrieval-Augmented Generation (RAG).
+It allows users to upload PDF files and ask questions directly about their contents. The system uses OpenAI’s GPT-5-mini model and is designed to ensure answers are grounded in the provided documents — not fabricated.
 
-First, run the development server:
+🚀 Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+DocuQuery follows a standard RAG pipeline:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Users upload one or more PDF documents.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The system extracts and embeds text segments for semantic search.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+When a question is asked, relevant chunks are retrieved from the PDF and passed to the GPT-5-mini model as context.
 
-## Learn More
+The chatbot responds only using information found in the document.
 
-To learn more about Next.js, take a look at the following resources:
+If the answer is not present, DocuQuery explicitly states that no answer was found rather than generating a “best guess.”
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If the answer is found, the response includes citations referencing where in the document the information was located.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🎓 Purpose
 
-## Deploy on Vercel
+DocuQuery is built for students and academic users who work with small to medium-sized documents such as:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Homework assignments
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Short readings
+
+Sections of textbooks
+
+Research papers or notes
+
+It saves users time by eliminating the need to manually search through PDFs for specific answers or explanations.
+
+💡 Why DocuQuery?
+
+Traditional chatbots often produce hallucinated or uncertain responses.
+DocuQuery solves this problem by:
+
+Restricting the model’s context to the uploaded document.
+
+Returning “no answer found” when the requested information isn’t in the file.
+
+Providing verifiable citations when it is.
+
+This makes it a more trustworthy tool for studying and academic reference.
+
+🧠 Tech Stack (In Development)
+
+Framework: Next.js (App Router)
+
+Styling: Tailwind CSS
+
+LLM: OpenAI GPT-5-mini
+
+Vector Database: Pinecone (for document embeddings & retrieval)
+
+Storage: Supabase / AWS S3 (for PDF uploads)
+
+🏗️ Development Status
+
+DocuQuery is currently under active development.
+Future updates will include:
+
+User authentication and document history
+
+Multi-PDF querying
+
+Exportable answer citations
+
+Improved UI for reading and referencing source documents
+
+⚖️ License & Attribution
+
+This project is proprietary and currently under development.
+Attributions for icons and third-party resources will be listed in the About or Credits section once the project is publicly released.
