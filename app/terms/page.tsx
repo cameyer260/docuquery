@@ -100,7 +100,7 @@ export default function TermsAndConditions() {
         <h1>9. Contact</h1>
         <p>
           For any questions about these Terms or your account, please contact:{" "}
-          <span className="font-semibold">support@docuquery.online</span>
+          <span className="font-semibold">cameyer@gmail.com</span>
         </p>
       </div>
     </div>

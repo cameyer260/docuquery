@@ -9,6 +9,8 @@ export default function Navbar() {
       </div>
       <div className="flex gap-8">
         <ModeToggle />
+        <Link href="/upload">Upload</Link>
+        <Link href="/ask">Ask</Link>
         <Link href="/about">About</Link>
         <Link href="/sign-in">Get Started</Link>
       </div>
