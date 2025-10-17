@@ -9,7 +9,7 @@ export default function Footer() {
       </div>
       <div className="flex gap-8">
         <Link href="/privacy-policy">Privacy Policy</Link>
-        <Link href="/terms-of-service">Terms of Service</Link>
+        <Link href="/terms">Terms of Service</Link>
       </div>
     </footer>
   );
