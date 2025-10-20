@@ -20,6 +20,7 @@ export default function Log({ title }: { title: string }) {
       "The answer to question 4 was not found in the text.",
     ],
   });
+  const [userInput, setUserInput] = useState<string>("");
 
   /**
    * useEffect for fetching the correct log for the user. currently just simulate how it would go with fake data.
@@ -36,6 +37,8 @@ export default function Log({ title }: { title: string }) {
 
   const sendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // then it sends the message saved to 
+    console.log(userInput)
   };
 
   if (loading) return <Loading />;
@@ -55,7 +58,7 @@ export default function Log({ title }: { title: string }) {
         >
           <h1 className="text-4xl">Let&apos;s Get Started</h1>
           <div className="flex gap-4 items-center">
-            <AutoResizeTextarea maxLength={150} />
+            <AutoResizeTextarea maxLength={150} value={userInput} onChange={(e) => setUserInput(e.target.value)}/>
             <Button
               variant="outline"
               size="icon"
