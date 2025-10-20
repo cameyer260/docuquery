@@ -1,5 +1,6 @@
 import Form from "next/form";
 import FileBlock from "./file-block";
+import { Input } from "../ui/input";
 
 export default function WithAccount() {
   const tempdev = [
@@ -19,11 +20,17 @@ export default function WithAccount() {
         <h1>Upload a PDF</h1>
         <Form
           action="/api/upload"
-          className="flex flex-col gap-2 [&_input]:w-60 [&_input]:border [&_input]: border-foreground/30 [&_input]:rounded-lg [&_input]:px-2"
+          className="flex flex-col gap-2 [&_input]:w-60 [&_input]:border [&_input]: border-foreground/30 [&_input]:rounded-lg [&_input]:px-2 [&_input]:text-lg"
         >
-          <input type="text" name="name" placeholder="name it" required />
-          <input type="file" name="pdf" accept=".pdf" required />
-          <input type="submit" value="Upload and Ingest" />
+          <Input
+            id="name"
+            type="text"
+            name="pdf"
+            placeholder="name it"
+            required
+          />
+          <Input id="pdf" type="file" accept=".pdf" name="pdf" required />
+          <Input type="submit" value="Upload and Ingest" />
         </Form>
       </div>
       <div className="flex flex-col gap-4 items-center">
