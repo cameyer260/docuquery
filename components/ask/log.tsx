@@ -58,7 +58,7 @@ export default function Log({ title }: { title: string }) {
         >
           <h1 className="text-4xl">Let&apos;s Get Started</h1>
           <div className="flex gap-4 items-center">
-            <AutoResizeTextarea maxLength={150} value={userInput} onChange={(e) => setUserInput(e.target.value)}/>
+            <AutoResizeTextarea maxLength={150} value={userInput} onChange={(e) => setUserInput(e.target.value)} />
             <Button
               variant="outline"
               size="icon"

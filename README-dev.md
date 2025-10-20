@@ -2,8 +2,6 @@
 
 ### Current Focus
 - Continue creating the UI for the entire site, pickup at /ask/[title] route, make the ui for a log WITH chat history
-- Make the default ask page for you to see all the documents you can chat with and choose one
-- Change cards on the upload page to use shadcn cards, make the whole page look better
 - Make the landing page look better, use more shadcn components and ai
 
 ### Remember
