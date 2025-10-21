@@ -14,6 +14,36 @@ export default function LogsSidebar() {
     "doctitle3",
     "doctitle4",
     "doctitle5",
+    "doctitle1",
+    "doctitle2",
+    "doctitle3",
+    "doctitle4",
+    "doctitle5",
+    "doctitle1",
+    "doctitle2",
+    "doctitle3",
+    "doctitle4",
+    "doctitle5",
+    "doctitle1",
+    "doctitle2",
+    "doctitle3",
+    "doctitle4",
+    "doctitle5",
+    "doctitle1",
+    "doctitle2",
+    "doctitle3",
+    "doctitle4",
+    "doctitle5",
+    "doctitle1",
+    "doctitle2",
+    "doctitle3",
+    "doctitle4",
+    "doctitle5",
+    "doctitle1",
+    "doctitle2",
+    "doctitle3",
+    "doctitle4",
+    "doctitle5",
   ]);
 
   /**
@@ -32,7 +62,7 @@ export default function LogsSidebar() {
   if (loading) return <Loading />;
   else
     return (
-      <div className="flex flex-col border-r border-foreground/30 min-h-full text-xl">
+      <div className="flex flex-col border-r border-foreground/30 h-full overflow-y-auto text-xl">
         {error && (
           <ErrorBanner text="Sorry, but we could not fetch your other logs. Please try again later." />
         )}

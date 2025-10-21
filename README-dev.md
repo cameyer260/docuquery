@@ -1,8 +1,7 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- Continue creating the UI for the entire site, pickup at /ask/[title] route, make the ui for a log WITH chat history
-- Make the landing page look better, use more shadcn components and ai
+- Get the signin/signup UI pages done
 
 ### Remember
 - The about and terms and conditions pages are not a finished product yet and will change throughout the entire development phase

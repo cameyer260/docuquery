@@ -21,12 +21,17 @@ export default function Ask() {
       { imgUrl: "/upload/document.png", title: "file6" },
       { imgUrl: "/upload/document.png", title: "file7" },
       { imgUrl: "/upload/document.png", title: "file8" },
+      { imgUrl: "/upload/document.png", title: "file9" },
+      { imgUrl: "/upload/document.png", title: "file10" },
+      { imgUrl: "/upload/document.png", title: "file11" },
     ]);
   }, []);
 
   return (
     <div className="flex flex-col items-center jusitfy-center p-6 gap-4">
-      <h1 className="text-center text-4xl font-bold">Choose a Document to Chat With</h1>
+      <h1 className="text-center text-4xl font-bold">
+        Choose a Document to Chat With
+      </h1>
       <YourDocumentsBlock documents={documents} />
     </div>
   );

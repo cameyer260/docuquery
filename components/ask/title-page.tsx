@@ -5,7 +5,7 @@ import Log from "./log";
 
 export default function TitlePage({ title }: { title: string }) {
   return (
-    <div className="flex flex-grow">
+    <div className="flex h-[calc(100vh-128px)]">
       <div className="flex-2">
         <LogsSidebar />
       </div>

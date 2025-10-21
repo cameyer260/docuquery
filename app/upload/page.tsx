@@ -50,7 +50,7 @@ export default function Upload() {
               accept=".pdf"
               name="pdf"
               required
-              className="w-full px-4 py-1 rounded-lg border border-foreground/20 bg-background/50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-foreground/10 file:text-foreground/80 hover:file:bg-foreground/20 transition-all duration-200"
+              className="w-full px-4 py-2 rounded-lg border border-foreground/20 bg-background/50 min-h-fit file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-foreground/10 file:text-foreground/80 hover:file:bg-foreground/20 transition-all duration-200"
             />
             <Input
               type="submit"
