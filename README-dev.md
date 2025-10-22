@@ -1,7 +1,10 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
+- Finish nextauth implementation
 - Get the signin/signup UI pages done
+- Configure auth providers
+- Deploy to vps (dont forget to copy .env vars over)
 
 ### Remember
 - The about and terms and conditions pages are not a finished product yet and will change throughout the entire development phase

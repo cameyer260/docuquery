@@ -4,6 +4,9 @@ import "./globals.css";
 import Navbar from "@/components/navbar/navbar";
 import { ThemeProvider } from "@/components/navbar/theme-provider";
 import Footer from "@/components/footer/footer";
+import ClientLayout from "./ClientLayout";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]/route";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,11 +23,12 @@ export const metadata: Metadata = {
   description: "AI chatbot that can read PDFs and answer questions about them.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -36,9 +40,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main className="flex flex-col flex-grow">{children}</main>
-          <Footer />
+          <ClientLayout session={session}>
+            <Navbar />
+            <main className="flex flex-col flex-grow">{children}</main>
+            <Footer />
+          </ClientLayout>
         </ThemeProvider>
       </body>
     </html>
