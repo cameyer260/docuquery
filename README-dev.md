@@ -1,9 +1,8 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- Finish nextauth implementation
-- Get the signin/signup UI pages done
-- Configure auth providers
+- configure the signin/signup page
+- start using the if user signed in show this else show this logic through all the pages
 - Deploy to vps (dont forget to copy .env vars over)
 
 ### Remember
