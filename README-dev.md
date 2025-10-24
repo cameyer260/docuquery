@@ -1,7 +1,6 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- figure out how to implement either middleware or some global function to redirect unauthed users on certain routes. handle forwarding signed in users away from the /auth/signin page first
 - start using the if user signed in show this else show this logic through all the pages
 
 ### Remember
