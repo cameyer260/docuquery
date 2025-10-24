@@ -7,12 +7,16 @@ export const authOptions = {
   // configure providers here
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
   ],
   // configure adapter here 
   adapter: PrismaAdapter(prisma),
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error', // Error code passed in query string as ?error=
+  },
 };
 
 const handler = NextAuth(authOptions);

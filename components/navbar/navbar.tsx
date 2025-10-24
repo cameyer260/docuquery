@@ -12,7 +12,7 @@ export default function Navbar() {
         <Link href="/upload">Upload</Link>
         <Link href="/ask">Ask</Link>
         <Link href="/about">About</Link>
-        <Link href="/sign-in">Get Started</Link>
+        <Link href="/auth/signin">Get Started</Link>
       </div>
     </nav>
   );
