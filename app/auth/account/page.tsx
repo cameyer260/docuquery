@@ -13,76 +13,31 @@ import {
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { ComponentType } from "react";
-import Provider from "next-auth";
 
-interface Provider {
-  id: string;
-  name: string;
-  icon: ComponentType;
-  connected: boolean;
-}
 export default function AccountPage() {
   const [showBanner, setShowBanner] = useState(false);
   const [bannerText, setBannerText] = useState("");
-  const [allProviders, setAllProviders] = useState<Provider[]>([]);
-  const [connectedProviders, setConnectedProviders] = useState<Provider[]>([]);
+  const [connectedProviders, setConnectedProviders] = useState<string[]>([]); // will just hold the id/name value of the providers they are connected to
   const { data: session, status } = useSession();
   const router = useRouter();
 
   if (status === "unauthenticated") router.push("/");
 
-  useEffect(() => {
-    async function getProviders() {
-      try {
-        const response = await fetch("/api/auth/providers");
-        const providers = await response.json();
-        // this will be what is used when more providers are sent and not just one
-        // setAllProviders([
-        //   providers.map((provider: Provider) => {
-        //     return {
-        //       id: provider.id,
-        //       name: provider.name,
-        //       icon: provider.name,
-        //       connected: false,
-        //     };
-        //   }),
-        // ]);
-        const provider: Provider = {
-          id: providers.google.id,
-          name: providers.google.name,
-          icon: Chrome,
-          connected: false,
-        }
-        setAllProviders([provider]);
-        console.log(providers);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    async function getConnected() {
-      try {
-        const response = await fetch("/api/account/providers");
-        const providers = await response.json();
-        setConnectedProviders(providers.payload);
-        console.log(providers);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    getProviders();
-    getConnected();
-  }, []);
+  const allProviders = [
+    { id: "google", name: "Google", icon: Chrome },
+    { id: "github", name: "GitHub", icon: Github },
+  ];
 
-  // // Mock connected providers - in real app, get from session/database
-  // const connectedProviders = [
-  //   { id: 'google', name: 'Google', icon: Chrome, connected: true }
-  // ];
-  //
-  // const allProviders = [
-  //   { id: 'google', name: 'Google', icon: Chrome },
-  //   { id: 'github', name: 'GitHub', icon: Github }
-  // ];
+  useEffect(() => {
+    async function getConnectedProviders() {
+      const response = await fetch("/api/account/providers");
+      const result = await response.json();
+      console.log(result);
+      setConnectedProviders(result.payload);
+    }
+
+    getConnectedProviders();
+  }, []);
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -207,9 +162,8 @@ export default function AccountPage() {
             <div className="space-y-3">
               {allProviders.map((provider) => {
                 const isConnected = connectedProviders.some(
-                  (p) => p.id === provider.id,
+                  (p: string) => p === provider.id,
                 );
-                console.log(provider);
                 const Icon = provider.icon;
 
                 return (
