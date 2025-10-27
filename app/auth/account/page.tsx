@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -9,19 +10,21 @@ import {
   Github,
   AlertCircle,
   ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function AccountPage() {
   const [showBanner, setShowBanner] = useState(false);
   const [bannerText, setBannerText] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [connectedProviders, setConnectedProviders] = useState<string[]>([]); // will just hold the id/name value of the providers they are connected to
   const { data: session, status } = useSession();
   const router = useRouter();
-
-  if (status === "unauthenticated") router.push("/");
 
   const allProviders = [
     { id: "google", name: "Google", icon: Chrome },
@@ -29,15 +32,47 @@ export default function AccountPage() {
   ];
 
   useEffect(() => {
+    if (status === "unauthenticated") router.push("/");
+  }, [router, status]);
+
+  useEffect(() => {
     async function getConnectedProviders() {
       const response = await fetch("/api/account/providers");
       const result = await response.json();
-      console.log(result);
+      if (!response.ok) {
+        setBannerText(
+          `Failed to fetch your connected authentication providers. Error message: ${result.error} Please try again later.`,
+        );
+        setShowBanner(true);
+        return;
+      }
       setConnectedProviders(result.payload);
     }
 
     getConnectedProviders();
   }, []);
+
+  const handleDeleteAccount = async () => {
+    setShowDeleteModal(false);
+    setDeleteConfirmText("");
+    setShowSuccessToast(true);
+    const response = await fetch("/api/account/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const result = await response.json();
+    if (response.ok) {
+      // Auto-hide toast after 3 seconds and redirect
+      setTimeout(() => {
+        setShowSuccessToast(false);
+        router.push("/");
+      }, 3000);
+    } else {
+      setBannerText("Unable to process your request. Please try again.");
+      setShowBanner(true);
+    }
+  };
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -79,6 +114,123 @@ export default function AccountPage() {
                 ×
               </button>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Success Toast */}
+        <AnimatePresence>
+          {showSuccessToast && (
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              className="fixed top-4 right-4 z-50 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4 shadow-lg flex items-center gap-3 max-w-md"
+            >
+              <div className="p-1 bg-green-100 dark:bg-green-950/50 rounded-full">
+                <svg
+                  className="w-5 h-5 text-green-600 dark:text-green-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-green-800 dark:text-green-300">
+                  Account Deleted
+                </h3>
+                <p className="text-sm text-green-700 dark:text-green-400">
+                  Your account has been successfully deleted.
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Delete Account Modal */}
+        <AnimatePresence>
+          {showDeleteModal && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 z-40"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmText("");
+                }}
+              />
+
+              {/* Modal */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              >
+                <div className="bg-card border rounded-lg shadow-lg max-w-md w-full p-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="p-2 bg-red-100 dark:bg-red-950/30 rounded-full">
+                      <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-2">
+                        Delete Account
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        This action cannot be undone. This will permanently
+                        delete your account and remove all of your data from our
+                        servers.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="text-sm font-medium block mb-2">
+                      Type{" "}
+                      <span className="font-bold text-red-600 dark:text-red-400">
+                        DELETE
+                      </span>{" "}
+                      to confirm
+                    </label>
+                    <input
+                      type="text"
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-red-500"
+                      placeholder="Type DELETE"
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowDeleteModal(false);
+                        setDeleteConfirmText("");
+                      }}
+                      className="flex-1 px-4 py-2 text-sm font-medium border rounded-md hover:bg-accent transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteAccount}
+                      disabled={deleteConfirmText !== "DELETE"}
+                      className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Delete Account
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
 
@@ -203,7 +355,12 @@ export default function AccountPage() {
                         </a>
                       </div>
                     ) : (
-                      <button className="px-4 py-2 text-sm font-medium bg-background border rounded-md hover:bg-accent transition-colors">
+                      <button
+                        className="px-4 py-2 text-sm font-medium bg-background border rounded-md hover:bg-accent transition-colors"
+                        onClick={async () => {
+                          await signOut({ callbackUrl: "/auth/signin" });
+                        }}
+                      >
                         Connect
                       </button>
                     )}
@@ -231,12 +388,7 @@ export default function AccountPage() {
 
             <div className="space-y-3">
               <button
-                onClick={() => {
-                  setBannerText(
-                    "Unable to process your request. Please try again.",
-                  );
-                  setShowBanner(true);
-                }}
+                onClick={() => setShowDeleteModal(true)}
                 className="w-full px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 bg-background border border-red-300 dark:border-red-800 rounded-md hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-left"
               >
                 Delete Account

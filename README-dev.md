@@ -1,13 +1,13 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- Finish the account page
 - Add more oauth sign in, add github sign in
 - Get all relevant account pages created (just the UI for now)
 
 ### Remember
 - The about and terms and conditions pages are not a finished product yet and will change throughout the entire development phase
 - Any time you add a new provider you need to update the account page to include it correctly
+- When you add payment, deleting an account will need to be updated accordingly. The user will have to cancel their plan first or you auto-cancel for them.
 
 ### Next Steps
 1. Implement uploading/digesting files with all necessary api routes (chunk pdf file up, then send to pinecone to be embedded and stored)
