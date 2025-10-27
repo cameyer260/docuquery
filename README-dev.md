@@ -1,7 +1,7 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- start using the if user signed in show this else show this logic through all the pages
+- Get all relevant account pages created (just the UI for now)
 
 ### Remember
 - The about and terms and conditions pages are not a finished product yet and will change throughout the entire development phase
