@@ -44,9 +44,6 @@ export default function UserAccount({
             <Link href="/auth/account/billing">
               <DropdownMenuItem>Billing</DropdownMenuItem>
             </Link>
-            <Link href="/auth/account/settings">
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-            </Link>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <button onClick={() => signOut()} className="w-full">

@@ -1,7 +1,7 @@
-import NextAuth from "next-auth";
+import NextAuth, { Session, User } from "next-auth";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/prisma/prisma"
+import { prisma } from "@/prisma/client"
 
 export const authOptions = {
   // configure providers here
@@ -17,6 +17,12 @@ export const authOptions = {
     signIn: '/auth/signin',
     error: '/auth/error', // Error code passed in query string as ?error=
   },
+  callbacks: {
+    async session({ session, user }: { session: Session, user: User}) {
+      session.user.id = user.id;
+      return session;
+    }
+  }
 };
 
 const handler = NextAuth(authOptions);

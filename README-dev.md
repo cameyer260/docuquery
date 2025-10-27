@@ -1,6 +1,8 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
+- Finish the account page
+- Add more oauth sign in, add github sign in
 - Get all relevant account pages created (just the UI for now)
 
 ### Remember
