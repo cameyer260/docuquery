@@ -1,9 +1,10 @@
 "use client";
-
 import Form from "next/form";
 import { Input } from "@/components/ui/input";
 import YourDocumentsBlock from "@/components/ask/your-documents-block";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Upload as UploadIcon, FileText } from "lucide-react";
 
 export interface Document {
   imgUrl: string;
@@ -31,38 +32,92 @@ export default function Upload() {
   }, []);
 
   return (
-    <div className="flex flex-col p-8 [&_h1]:text-4xl [&_h1]:font-bold gap-12 items-center bg-gradient-to-b from-background/80 to-background min-h-screen">
-      <div className="flex flex-col gap-6 items-center w-full max-w-md">
-        <h1 className="text-foreground/90">Upload a PDF</h1>
-        <div className="w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-foreground/10">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 text-center"
+        >
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <UploadIcon className="w-8 h-8 text-muted-foreground" />
+            <h1 className="text-4xl font-bold">Upload a PDF</h1>
+          </div>
+          <p className="text-muted-foreground mt-2">
+            Upload your documents to get started with AI-powered analysis
+          </p>
+        </motion.div>
+
+        {/* Upload Form Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-card rounded-lg border p-6 mb-12 max-w-2xl mx-auto"
+        >
           <Form action="/api/upload" className="flex flex-col gap-4">
-            <Input
-              id="name"
-              type="text"
-              name="pdf"
-              placeholder="Name your PDF"
-              required
-              className="w-full px-4 py-2 rounded-lg border border-foreground/20 bg-background/50 focus:outline-none focus:ring-2 focus:ring-foreground/30 transition-all duration-200"
-            />
-            <Input
-              id="pdf"
-              type="file"
-              accept=".pdf"
-              name="pdf"
-              required
-              className="w-full px-4 py-2 rounded-lg border border-foreground/20 bg-background/50 min-h-fit file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-foreground/10 file:text-foreground/80 hover:file:bg-foreground/20 transition-all duration-200"
-            />
+            <div>
+              <label htmlFor="name" className="text-sm font-medium block mb-2">
+                Document Name
+              </label>
+              <Input
+                id="name"
+                type="text"
+                name="pdf"
+                placeholder="Enter a name for your PDF"
+                required
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="pdf" className="text-sm font-medium block mb-2">
+                Select PDF File
+              </label>
+              <Input
+                id="pdf"
+                type="file"
+                accept=".pdf"
+                name="pdf"
+                required
+                className="w-full"
+              />
+            </div>
+
             <Input
               type="submit"
               value="Upload and Ingest"
-              className="w-full px-4 py-2 rounded-lg bg-foreground/90 text-white hover:bg-foreground/70 focus:outline-none focus:ring-2 focus:ring-foreground/30 transition-all duration-200 cursor-pointer"
+              className="w-full mt-2 bg-primary hover:bg-primary/90 cursor-pointer"
             />
           </Form>
-        </div>
-        <div className="flex flex-col gap-4 items-center justify-center">
-          <h1 className="text-foreground/90">Your Documents</h1>
-          <YourDocumentsBlock documents={documents} />
-        </div>
+        </motion.div>
+
+        {/* Your Documents Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <FileText className="w-6 h-6 text-muted-foreground" />
+            <h2 className="text-3xl font-bold">Your Documents</h2>
+          </div>
+
+          {documents.length === 0 ? (
+            <div className="bg-card rounded-lg border p-12 text-center">
+              <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">
+                No documents uploaded yet
+              </p>
+              <p className="text-muted-foreground text-sm mt-2">
+                Upload your first PDF to get started
+              </p>
+            </div>
+          ) : (
+            <YourDocumentsBlock documents={documents} />
+          )}
+        </motion.div>
       </div>
     </div>
   );

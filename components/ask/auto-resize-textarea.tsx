@@ -1,22 +1,24 @@
-import * as React from "react"
-import { Textarea } from "@/components/ui/textarea"
+import * as React from "react";
+import { Textarea } from "@/components/ui/textarea";
 
-export function AutoResizeTextarea(props: React.ComponentProps<typeof Textarea>) {
-  const ref = React.useRef<HTMLTextAreaElement>(null)
+export function AutoResizeTextarea(
+  props: React.ComponentProps<typeof Textarea>
+) {
+  const ref = React.useRef<HTMLTextAreaElement>(null);
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const el = ref.current
+    const el = ref.current;
     if (el) {
-      el.style.height = "auto"
-      el.style.height = `${el.scrollHeight}px`
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
     }
-    props.onChange?.(e)
-  }
+    props.onChange?.(e);
+  };
 
   React.useEffect(() => {
-    const el = ref.current
-    if (el) el.style.height = `${el.scrollHeight}px`
-  }, [])
+    const el = ref.current;
+    if (el) el.style.height = `${el.scrollHeight}px`;
+  }, []);
 
   return (
     <Textarea
@@ -25,5 +27,5 @@ export function AutoResizeTextarea(props: React.ComponentProps<typeof Textarea>)
       onChange={handleInput}
       className="w-[400px] min-h-[20px] overflow-hidden resize-none"
     />
-  )
+  );
 }
