@@ -1,28 +1,34 @@
 import NextAuth, { Session, User } from "next-auth";
 import Google from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/prisma/client"
+import GitHubProvider from "next-auth/providers/github";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/prisma/client";
 
 export const authOptions = {
   // configure providers here
   providers: [
     Google({
-      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
+    GitHubProvider({
+      clientId: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID as string,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
     }),
   ],
-  // configure adapter here 
+  // configure adapter here
   adapter: PrismaAdapter(prisma),
   pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error', // Error code passed in query string as ?error=
+    signIn: "/auth/signin",
+    error: "/auth/error", // Error code passed in query string as ?error=
   },
   callbacks: {
-    async session({ session, user }: { session: Session, user: User}) {
+    // Add the user.id to our session, used to perform various db queries/actions
+    async session({ session, user }: { session: Session; user: User }) {
       session.user.id = user.id;
       return session;
-    }
-  }
+    },
+  },
 };
 
 const handler = NextAuth(authOptions);

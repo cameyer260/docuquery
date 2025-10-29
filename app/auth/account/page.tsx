@@ -13,7 +13,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import Image from "next/image";
-import { signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function AccountPage() {
@@ -47,6 +47,7 @@ export default function AccountPage() {
         return;
       }
       setConnectedProviders(result.payload);
+      console.log(result);
     }
 
     getConnectedProviders();
@@ -345,7 +346,11 @@ export default function AccountPage() {
                           Active
                         </span>
                         <a
-                          href={`https://myaccount.${provider.id}.com`}
+                          href={
+                            provider.id === "github"
+                              ? "https://github.com/settings/profile"
+                              : `https://myaccount.${provider.id}.com`
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
@@ -357,8 +362,8 @@ export default function AccountPage() {
                     ) : (
                       <button
                         className="px-4 py-2 text-sm font-medium bg-background border rounded-md hover:bg-accent transition-colors"
-                        onClick={async () => {
-                          await signOut({ callbackUrl: "/auth/signin" });
+                        onClick={() => {
+                          signIn("github");
                         }}
                       >
                         Connect

@@ -1,7 +1,7 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- Add more oauth sign in, add github sign in
+- Finish oauth account sync in signIn callback func in /api/auth/[..nextauth]/route.ts
 - Get all relevant account pages created (just the UI for now)
 
 ### Remember
