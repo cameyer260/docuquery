@@ -1,5 +1,4 @@
 "use client";
-import Form from "next/form";
 import { Input } from "@/components/ui/input";
 import YourDocumentsBlock from "@/components/ask/your-documents-block";
 import { useState, useEffect } from "react";
@@ -13,6 +12,25 @@ export interface Document {
 
 export default function Upload() {
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileName, setFileName] = useState<string>("");
+
+  const uploadFile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("name", fileName);
+
+    const res = await fetch("/api/files/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    console.log(data);
+  }
 
   /**
    * useEffect for fetching the users' documents
@@ -56,7 +74,7 @@ export default function Upload() {
           transition={{ delay: 0.1 }}
           className="bg-card rounded-lg border p-6 mb-12 max-w-2xl mx-auto"
         >
-          <Form action="/api/upload" className="flex flex-col gap-4">
+          <form onSubmit={uploadFile} className="flex flex-col gap-4">
             <div>
               <label htmlFor="name" className="text-sm font-medium block mb-2">
                 Document Name
@@ -66,6 +84,7 @@ export default function Upload() {
                 type="text"
                 name="pdf"
                 placeholder="Enter a name for your PDF"
+                onChange={(e) => setFileName(e.target.value)}
                 required
                 className="w-full"
               />
@@ -81,6 +100,7 @@ export default function Upload() {
                 accept=".pdf"
                 name="pdf"
                 required
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="w-full"
               />
             </div>
@@ -90,7 +110,7 @@ export default function Upload() {
               value="Upload and Ingest"
               className="w-full mt-2 bg-primary hover:bg-primary/90 cursor-pointer"
             />
-          </Form>
+          </form>
         </motion.div>
 
         {/* Your Documents Section */}
