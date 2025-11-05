@@ -1,10 +1,12 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- Implement uploading/digesting files with all necessary api routes (chunk pdf file up, then send to pinecone to be embedded and stored)
+- Finish image preview generation to upload route.ts. Pickup at the TODO comment (load file back into memory, upload to s3, then delete)
+- Add pinecone embed + store to upload route.ts
 
 ### Remember
 - When you deploy setup github actions.
+- When you deploy install graphicsmagik, imagemagick, and ghostscript on the vps as they are dependencies for pdf2pic
 - The about and terms and conditions pages are not a finished product yet and will change throughout the entire development phase
 - Any time you add a new provider you need to update the account page to include it correctly
 - When you add payment, deleting an account will need to be updated accordingly. The user will have to cancel their plan first or you auto-cancel for them.
