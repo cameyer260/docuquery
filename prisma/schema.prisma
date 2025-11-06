@@ -16,6 +16,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  documents     Document[]
   // Optional for WebAuthn support
   Authenticator Authenticator[]
  
@@ -77,4 +78,23 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
   @@id([userId, credentialID])
+}
+
+model Document {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String    @unique
+  createdAt   DateTime  @default(now())
+  previewId   String    @unique
+  preview     Preview?
+ 
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade) // user to document is a one to many relationship. the user "owns" many documents
+  @@unique([userId, name]) // unique document name per user
+}
+
+model Preview {
+  id            String    @id @default(cuid())
+  documentId    String    @unique // ensure 1-1 relationship
+  
+  document    Document    @relation(fields: [documentId], references: [id]) // preview to documetn relatinship is one to one. documents own one or zero previews
 }
