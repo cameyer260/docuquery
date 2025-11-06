@@ -85,7 +85,6 @@ model Document {
   userId      String
   name        String    @unique
   createdAt   DateTime  @default(now())
-  previewId   String    @unique
   preview     Preview?
  
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade) // user to document is a one to many relationship. the user "owns" many documents

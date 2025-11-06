@@ -7,6 +7,11 @@ import { getPdfPreview } from "@/utils/pdf-to-image";
 import { prisma } from "@/prisma/client";
 
 export async function POST(req: NextRequest) {
+  // bool variables to mark checkppoints in the upload process. used for error handling so I know where to delete from if an upload fails
+  let postgresFile = false;
+  let postgresPreview = false;
+  let awsFile = false;
+  let awsPreview = false;
   try {
     // handle auth up top
     const session = await getServerSession(authOptions);
@@ -34,16 +39,34 @@ export async function POST(req: NextRequest) {
     // first check if the user has already uploaded a file with that name
     const exists = await prisma.document.findFirst({
       where: {
+        userId: userId,
         name: name,
       },
     });
     if (exists) return NextResponse.json({ error: "Please choose a unique file name, you already have one under that name." }, { status: 409 });
 
+    // create image preview to upload with the doc itself
+    const previewBuffer = await getPdfPreview(fileBuffer);
 
-    // otherwise all tests passed, upload the file to postgres then s3
-    // TODO pickup here. save document name and preview to the db accordingly
+    // all tests passed, upload the file and preview to postgres then s3
+    // first save the pdf to document table
+    const pdf = await prisma.document.create({
+      data: {
+        userId: userId,
+        name: name,
+      },
+    });
+    postgresFile = true;
 
-    // upload to s3
+    // then save the preview to the table
+    await prisma.preview.create({
+      data: {
+        documentId: pdf.id,
+      },
+    });
+    postgresPreview = true;
+
+    // then upload the document to s3
     const putFileCommand = new PutObjectCommand({
       Bucket: "docuquery-files",
       Key: filename,
@@ -51,9 +74,7 @@ export async function POST(req: NextRequest) {
       ContentType: file.type,
     });
     await s3client.send(putFileCommand);
-
-    // create image preview upload it
-    const previewBuffer = await getPdfPreview(fileBuffer);
+    awsFile = true;
 
     // finally we can upload the image buffer to s3
     const previewName = `user-${userId}/previews/${formData.get("name")}`;
@@ -64,6 +85,7 @@ export async function POST(req: NextRequest) {
       ContentType: file.type,
     });
     await s3client.send(putPreviewCommand);
+    awsPreview = true;
 
     // TDOO now upload it to pinecone, embed it there and then upload in vector db as well
 
@@ -71,10 +93,21 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error(error);
-    // TODO
-    // if one upload fails, we need to delete the others that were uploaded as well
-    // if the image preview generation or upload fails we need to remove the file from s3
-    // if the vector upload failed then we need to remove the file and image preview from s3
+
+    // if one upload fails, any of the successful uploads now need to be deleted. we can use these checkpoint variables that indicate which uploads happened and which did not
+    if (postgresFile) {
+
+    }
+    if (postgresPreview) {
+
+    }
+    if (postgresFile) {
+
+    }
+    if (postgresPreview) {
+
+    }
+
     return NextResponse.json(
       { error: "Internal server error." },
       { status: 500 },
