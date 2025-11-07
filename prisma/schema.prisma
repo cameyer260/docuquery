@@ -95,5 +95,5 @@ model Preview {
   id            String    @id @default(cuid())
   documentId    String    @unique // ensure 1-1 relationship
   
-  document    Document    @relation(fields: [documentId], references: [id]) // preview to documetn relatinship is one to one. documents own one or zero previews
+  document    Document    @relation(fields: [documentId], references: [id]) // preview to document relationship is one to one. documents own one or zero previews
 }

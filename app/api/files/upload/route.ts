@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3client } from "@/s3/client";
 import { getPdfPreview } from "@/utils/pdf-to-image";
 import { prisma } from "@/prisma/client";
 
 export async function POST(req: NextRequest) {
-  // bool variables to mark checkppoints in the upload process. used for error handling so I know where to delete from if an upload fails
-  let postgresFile = false;
-  let postgresPreview = false;
-  let awsFile = false;
-  let awsPreview = false;
+  // bool variables to mark checkppoints in the upload process. used for error handling so I know where and what to delete if an upload fails
+  let postgresFile: { userId: string, name: string } | null = null; // holds postgresfile necessary info for delete
+  let postgresPreview: string | null = null; // holds the documentId
+  let awsFile: string | null = null;
+  let awsPreview: string | null = null;
   try {
     // handle auth up top
     const session = await getServerSession(authOptions);
@@ -50,23 +50,26 @@ export async function POST(req: NextRequest) {
 
     // all tests passed, upload the file and preview to postgres then s3
     // first save the pdf to document table
+    // the reason why the check point is before the req is because of the req's async nature. an error may occur before the promise has resolved
+    // and the postgresFile variable will not hold the necessary info for delete even though the file ended up being successfully deleted
+    postgresFile = { userId: userId, name: name }
     const pdf = await prisma.document.create({
       data: {
         userId: userId,
         name: name,
       },
     });
-    postgresFile = true;
 
     // then save the preview to the table
-    await prisma.preview.create({
+    postgresPreview = pdf.id;
+    const prev = await prisma.preview.create({
       data: {
         documentId: pdf.id,
       },
     });
-    postgresPreview = true;
 
     // then upload the document to s3
+    awsFile = filename;
     const putFileCommand = new PutObjectCommand({
       Bucket: "docuquery-files",
       Key: filename,
@@ -74,10 +77,10 @@ export async function POST(req: NextRequest) {
       ContentType: file.type,
     });
     await s3client.send(putFileCommand);
-    awsFile = true;
 
     // finally we can upload the image buffer to s3
     const previewName = `user-${userId}/previews/${formData.get("name")}`;
+    awsPreview = previewName;
     const putPreviewCommand = new PutObjectCommand({
       Bucket: "docuquery-files",
       Key: previewName,
@@ -85,7 +88,6 @@ export async function POST(req: NextRequest) {
       ContentType: file.type,
     });
     await s3client.send(putPreviewCommand);
-    awsPreview = true;
 
     // TDOO now upload it to pinecone, embed it there and then upload in vector db as well
 
@@ -95,17 +97,38 @@ export async function POST(req: NextRequest) {
     console.error(error);
 
     // if one upload fails, any of the successful uploads now need to be deleted. we can use these checkpoint variables that indicate which uploads happened and which did not
-    if (postgresFile) {
-
-    }
+    // and the id/key of each upload to delete as well
+    // also due to the one to one relationship between preview and document, and the preview holding the 
+    // foreign key, preview cannot exist without a document to link to, so we must always delete the preview first and then
+    // the document
     if (postgresPreview) {
-
+      await prisma.preview.delete({
+        where: {
+          documentId: postgresPreview,
+        }
+      });
     }
     if (postgresFile) {
-
+      await prisma.document.delete({
+        where: {
+          userId: postgresFile.userId,
+          name: postgresFile.name,
+        }
+      });
     }
-    if (postgresPreview) {
-
+    if (awsFile) {
+      const deleteAwsCommand = new DeleteObjectCommand({
+        Bucket: "docuquery-files",
+        Key: awsFile,
+      });
+      await s3client.send(deleteAwsCommand);
+    }
+    if (awsPreview) {
+      const deleteAwsCommand = new DeleteObjectCommand({
+        Bucket: "docuquery-files",
+        Key: awsPreview,
+      });
+      await s3client.send(deleteAwsCommand);
     }
 
     return NextResponse.json(

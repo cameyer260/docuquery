@@ -1,7 +1,7 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- Finish upload route.ts. Pickup at the upload file to postgres todo.
+- Connect pinecone in upload route.
 - Once done integrating this start using different branches for new features, view the notes you took
 - Add pinecone embed + store to upload route.ts
 - Once all upload has been implemented, correctly clear s3 and pinecone of user data on their account deletion
