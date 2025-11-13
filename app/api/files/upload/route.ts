@@ -8,8 +8,8 @@ import { prisma } from "@/prisma/client";
 
 export async function POST(req: NextRequest) {
   // bool variables to mark checkppoints in the upload process. used for error handling so I know where and what to delete if an upload fails
-  let postgresFile: { userId: string, name: string } | null = null; // holds postgresfile necessary info for delete
-  let postgresPreview: string | null = null; // holds the documentId
+  let postgresFile: string | null = null;
+  let postgresPreview: string | null = null;
   let awsFile: string | null = null;
   let awsPreview: string | null = null;
   try {
@@ -50,26 +50,24 @@ export async function POST(req: NextRequest) {
 
     // all tests passed, upload the file and preview to postgres then s3
     // first save the pdf to document table
-    // the reason why the check point is before the req is because of the req's async nature. an error may occur before the promise has resolved
-    // and the postgresFile variable will not hold the necessary info for delete even though the file ended up being successfully deleted
-    postgresFile = { userId: userId, name: name }
+    // then set the checkpoint variable to the pdf id so I know what to delete if later uploads fail
     const pdf = await prisma.document.create({
       data: {
         userId: userId,
         name: name,
       },
     });
+    postgresFile = pdf.id;
 
     // then save the preview to the table
-    postgresPreview = pdf.id;
     const prev = await prisma.preview.create({
       data: {
         documentId: pdf.id,
       },
     });
+    postgresPreview = prev.id;
 
     // then upload the document to s3
-    awsFile = filename;
     const putFileCommand = new PutObjectCommand({
       Bucket: "docuquery-files",
       Key: filename,
@@ -77,10 +75,10 @@ export async function POST(req: NextRequest) {
       ContentType: file.type,
     });
     await s3client.send(putFileCommand);
+    awsFile = filename;
 
     // finally we can upload the image buffer to s3
     const previewName = `user-${userId}/previews/${formData.get("name")}`;
-    awsPreview = previewName;
     const putPreviewCommand = new PutObjectCommand({
       Bucket: "docuquery-files",
       Key: previewName,
@@ -88,6 +86,7 @@ export async function POST(req: NextRequest) {
       ContentType: file.type,
     });
     await s3client.send(putPreviewCommand);
+    awsPreview = previewName;
 
     // TDOO now upload it to pinecone, embed it there and then upload in vector db as well
 
@@ -104,15 +103,14 @@ export async function POST(req: NextRequest) {
     if (postgresPreview) {
       await prisma.preview.delete({
         where: {
-          documentId: postgresPreview,
+          id: postgresPreview,
         }
       });
     }
     if (postgresFile) {
       await prisma.document.delete({
         where: {
-          userId: postgresFile.userId,
-          name: postgresFile.name,
+          id: postgresFile,
         }
       });
     }
