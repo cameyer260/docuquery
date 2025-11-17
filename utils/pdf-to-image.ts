@@ -1,5 +1,9 @@
 import { spawn } from "child_process";
 
+/**
+ * method for converting a pdf buffer to a png buffer.
+ * uses the imagemagick binary.
+ */
 export async function getPdfPreview(pdfBuffer: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const child = spawn('convert', [

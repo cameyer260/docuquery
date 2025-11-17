@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { s3client } from "@/s3/client";
+import { s3client } from "@/utils/s3/client";
 import { getPdfPreview } from "@/utils/pdf-to-image";
 import { prisma } from "@/prisma/client";
+import { pc } from "@/utils/pinecone/client";
+import { getPdfText } from "@/utils/pdf-to-text";
 
 export async function POST(req: NextRequest) {
   // bool variables to mark checkppoints in the upload process. used for error handling so I know where and what to delete if an upload fails
@@ -12,6 +14,7 @@ export async function POST(req: NextRequest) {
   let postgresPreview: string | null = null;
   let awsFile: string | null = null;
   let awsPreview: string | null = null;
+  let pinecone: { namespace: string, pdfId: string } | null = null;
   try {
     // handle auth up top
     const session = await getServerSession(authOptions);
@@ -22,7 +25,7 @@ export async function POST(req: NextRequest) {
       );
     const userId = session?.user?.id;
 
-    // TODO add rate limiting here
+    // TODO add rate limiting here. limit the file size as well
 
     // harvest the formdata. expect file and name
     const formData = await req.formData();
@@ -48,9 +51,18 @@ export async function POST(req: NextRequest) {
     // create image preview to upload with the doc itself
     const previewBuffer = await getPdfPreview(fileBuffer);
 
-    // all tests passed, upload the file and preview to postgres then s3
+    // all tests passed, first we'll convert the pdf to text
+    const textBuffer = await getPdfText(fileBuffer);
+
+    // then convert it to chunks array. chunk by 128 chars.
+    const chunks: string[] = [];
+    for (let i = 0; i < textBuffer.length; i += 128) {
+      chunks.push(textBuffer.slice(i, i + 128));
+    }
+
+    // then we'll upload the file and preview to postgres then s3
     // first save the pdf to document table
-    // then set the checkpoint variable to the pdf id so I know what to delete if later uploads fail
+    // then set the checkpoint variable accordingly so I know what to delete if later uploads fail
     const pdf = await prisma.document.create({
       data: {
         userId: userId,
@@ -77,7 +89,7 @@ export async function POST(req: NextRequest) {
     await s3client.send(putFileCommand);
     awsFile = filename;
 
-    // finally we can upload the image buffer to s3
+    // now we can upload the image buffer to s3
     const previewName = `user-${userId}/previews/${formData.get("name")}`;
     const putPreviewCommand = new PutObjectCommand({
       Bucket: "docuquery-files",
@@ -88,7 +100,18 @@ export async function POST(req: NextRequest) {
     await s3client.send(putPreviewCommand);
     awsPreview = previewName;
 
-    // TDOO now upload it to pinecone, embed it there and then upload in vector db as well
+    // finally upload it to pinecone. pinecone will automatically handle embedding the text.
+    const namespace = pc.index("docuquery", "https://docuquery-38emsw1.svc.aped-4627-b74a.pinecone.io").namespace(userId);
+    const records = chunks.map((value, index) => ({
+      "_id": `${pdf.id}#${index}`,
+      "text": value,
+      "pdf_id": pdf.id,
+    }));
+    await namespace.upsertRecords(records);
+    pinecone = {
+      namespace: userId,
+      pdfId: pdf.id,
+    };
 
     return NextResponse.json({ payload: "Successfully uploaded the file." }, { status: 200 });
 
@@ -127,6 +150,12 @@ export async function POST(req: NextRequest) {
         Key: awsPreview,
       });
       await s3client.send(deleteAwsCommand);
+    }
+    if (pinecone) {
+      const namespace = pc.index("docuquery", "https://docuquery-38emsw1.svc.aped-4627-b74a.pinecone.io").namespace(pinecone.namespace);
+      await namespace.deleteMany({
+        pdf_id: { $eq: pinecone.pdfId }
+      });
     }
 
     return NextResponse.json(

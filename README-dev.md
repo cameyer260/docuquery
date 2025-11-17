@@ -1,17 +1,20 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- Connect pinecone in upload route.
+- Add fetching and displaying the files to the users.
+- Allow the users to remove files from their account.
 - Once done integrating this start using different branches for new features, view the notes you took
-- Add pinecone embed + store to upload route.ts
 - Once all upload has been implemented, correctly clear s3 and pinecone of user data on their account deletion
 
 ### Remember
+- When you deploy add basic rate limiting for read and write. In the upload route specifically, rate limit users on upload count and the size of the documents
 - When you deploy setup github actions.
 - When you deploy install imagemagick binary on the vps, it is used in the image generation script
+- When you deploy install poppler-utils, it is used in the pdf parsing to harvest the text from pdfs
 - The about and terms and conditions pages are not a finished product yet and will change throughout the entire development phase
 - Any time you add a new provider you need to update the account page to include it correctly
 - When you add payment, deleting an account will need to be updated accordingly. The user will have to cancel their plan first or you auto-cancel for them.
+
 ### Next Steps
 1. Implement necessary api(s) for /ask:
     - take user input, send it to pinecone for ONLY embedding and query db for similar results from docs that user owns
