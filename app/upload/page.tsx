@@ -4,6 +4,7 @@ import YourDocumentsBlock from "@/components/ask/your-documents-block";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Upload as UploadIcon, FileText } from "lucide-react";
+import ErrorBanner from "@/components/global/error-banner";
 
 export interface Document {
   imgUrl: string;
@@ -14,6 +15,7 @@ export default function Upload() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
+  const [error, setError] = useState<boolean>(false);
 
   const uploadFile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,21 +38,40 @@ export default function Upload() {
    * useEffect for fetching the users' documents
    */
   useEffect(() => {
-    // set documents here
-    setDocuments([
-      { imgUrl: "/upload/document.png", title: "file1" },
-      { imgUrl: "/upload/document.png", title: "file2" },
-      { imgUrl: "/upload/document.png", title: "file3" },
-      { imgUrl: "/upload/document.png", title: "file4" },
-      { imgUrl: "/upload/document.png", title: "file5" },
-      { imgUrl: "/upload/document.png", title: "file6" },
-      { imgUrl: "/upload/document.png", title: "file7" },
-      { imgUrl: "/upload/document.png", title: "file8" },
-    ]);
+    const fetchFilesMetadata = async () => {
+      try {
+        const res = await fetch("/api/files/fetch-all", {
+          method: "GET"
+        });
+        const result = await res.json();
+
+        console.log(result);
+
+        setError(false);
+      } catch (error) {
+        console.error(error);
+        setError(true);
+      }
+      // set documents here
+      setDocuments([
+        { imgUrl: "/upload/document.png", title: "file1" },
+        { imgUrl: "/upload/document.png", title: "file2" },
+        { imgUrl: "/upload/document.png", title: "file3" },
+        { imgUrl: "/upload/document.png", title: "file4" },
+        { imgUrl: "/upload/document.png", title: "file5" },
+        { imgUrl: "/upload/document.png", title: "file6" },
+        { imgUrl: "/upload/document.png", title: "file7" },
+        { imgUrl: "/upload/document.png", title: "file8" },
+      ]);
+    }
+
   }, []);
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      {error && (
+        <ErrorBanner text="An error occurred when fetching your documents. Please try again later." />
+      )}
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
