@@ -71,14 +71,6 @@ export async function POST(req: NextRequest) {
     });
     postgresFile = pdf.id;
 
-    // then save the preview to the table
-    const prev = await prisma.preview.create({
-      data: {
-        documentId: pdf.id,
-      },
-    });
-    postgresPreview = prev.id;
-
     // then upload the document to s3
     const putFileCommand = new PutObjectCommand({
       Bucket: "docuquery-files",
@@ -99,6 +91,15 @@ export async function POST(req: NextRequest) {
     });
     await s3client.send(putPreviewCommand);
     awsPreview = previewName;
+
+    // then save the preview to the table
+    const prev = await prisma.preview.create({
+      data: {
+        documentId: pdf.id,
+        // TODO add presigned url here
+      },
+    });
+    postgresPreview = prev.id;
 
     // finally upload it to pinecone. pinecone will automatically handle embedding the text.
     const namespace = pc.index("docuquery", "https://docuquery-38emsw1.svc.aped-4627-b74a.pinecone.io").namespace(userId);
@@ -130,13 +131,6 @@ export async function POST(req: NextRequest) {
         }
       });
     }
-    if (postgresFile) {
-      await prisma.document.delete({
-        where: {
-          id: postgresFile,
-        }
-      });
-    }
     if (awsFile) {
       const deleteAwsCommand = new DeleteObjectCommand({
         Bucket: "docuquery-files",
@@ -150,6 +144,13 @@ export async function POST(req: NextRequest) {
         Key: awsPreview,
       });
       await s3client.send(deleteAwsCommand);
+    }
+    if (postgresFile) {
+      await prisma.document.delete({
+        where: {
+          id: postgresFile,
+        }
+      });
     }
     if (pinecone) {
       const namespace = pc.index("docuquery", "https://docuquery-38emsw1.svc.aped-4627-b74a.pinecone.io").namespace(pinecone.namespace);

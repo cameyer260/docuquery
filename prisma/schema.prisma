@@ -94,6 +94,8 @@ model Document {
 model Preview {
   id            String    @id @default(cuid())
   documentId    String    @unique // ensure 1-1 relationship
+  presignedUrl  String?           // temp url to aws s3 image
+  expiry        DateTime?         // when it expires
   
   document    Document    @relation(fields: [documentId], references: [id]) // preview to document relationship is one to one. documents own one or zero previews
 }
