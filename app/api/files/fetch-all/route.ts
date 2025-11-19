@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import type { ClientDocument } from "@/types/client-side-types";
+import { presignedUrlClient } from "@/utils/s3/client";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export async function GET() {
   try {
@@ -25,9 +28,29 @@ export async function GET() {
       }
     });
 
-    // TODO update presigned urls if needed
     // loop through files and get new presigned urls for previews that have expired
-    // TODO DEBUG PRESIGNED URL NOT WORKING
+    files.map(async (value) => {
+      if (value.preview?.expiry && value.preview.expiry > new Date(new Date().toUTCString())) {
+        const getPreviewCommand = new GetObjectCommand({
+          Bucket: "docuquery-files",
+          Key: `user-${userId}/previews/${value.name}.png`,
+        });
+        const url = await getSignedUrl(presignedUrlClient, getPreviewCommand, { expiresIn: 3600 }); // 60 minutes
+        const expiry = new Date();
+        expiry.setMinutes(expiry.getMinutes() + 59); // take off a minute to be safe, it might take time for these lines of code to run
+
+        // then update the preview in postgres
+        await prisma.preview.update({
+          where: {
+            id: value.preview.id
+          },
+          data: {
+            presignedUrl: url,
+            expiry: expiry,
+          },
+        });
+      }
+    })
 
     // clean the query result and send only the necessary data back
     const data: ClientDocument[] = files.map((item) => {
