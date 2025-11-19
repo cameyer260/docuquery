@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Upload as UploadIcon, FileText } from "lucide-react";
 import ErrorBanner from "@/components/global/error-banner";
 import type { ClientDocument } from "@/types/client-side-types";
+import SuccessBanner from "@/components/global/success-banner";
 
 export default function Upload() {
   const [documents, setDocuments] = useState<ClientDocument[]>([]);
@@ -13,22 +14,34 @@ export default function Upload() {
   const [fileName, setFileName] = useState<string>("");
   const [error, setError] = useState<boolean>(false);
   const [errorText, setErrorText] = useState<string>("An error occurred when fetching your documents. Please try again later.");
+  const [success, setSuccess] = useState<boolean>(false);
+  const [triggerRefetch, setTriggerRefetch] = useState<boolean>(false);
 
   const uploadFile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) return;
+    try {
+      setSuccess(false);
+      e.preventDefault();
+      if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("name", fileName);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("name", fileName);
 
-    const res = await fetch("/api/files/upload", {
-      method: "POST",
-      body: formData,
-    });
+      const res = await fetch("/api/files/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await res.json();
 
-    const data = await res.json();
-    console.log(data);
+      if (!res.ok) throw result.error;
+
+      setSuccess(true);
+      setTriggerRefetch(!triggerRefetch);
+    } catch (error) {
+      console.error(error);
+      setError(true);
+      setErrorText(error as string);
+    }
   }
 
   /**
@@ -45,7 +58,7 @@ export default function Upload() {
 
         // loop the result payload and set our client docs accordingly
         setDocuments(result.payload.map((item: ClientDocument) => {
-          return { imgUrl: "/upload/document.png", title: item.title };
+          return { imgUrl: item.imgUrl, title: item.title, id: item.id };
         }));
 
         setError(false);
@@ -58,12 +71,15 @@ export default function Upload() {
     }
 
     fetchFilesMetadata();
-  }, []);
+  }, [triggerRefetch]);
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       {error && (
         <ErrorBanner text={errorText} />
+      )}
+      {success && (
+        <SuccessBanner text={"Successfully uploaded document!"} />
       )}
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -124,6 +140,7 @@ export default function Upload() {
               value="Upload and Ingest"
               className="w-full mt-2 bg-primary hover:bg-primary/90 cursor-pointer"
             />
+
           </form>
         </motion.div>
 

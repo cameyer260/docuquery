@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { s3client } from "@/utils/s3/client";
 import { getPdfPreview } from "@/utils/pdf-to-image";
 import { prisma } from "@/prisma/client";
 import { pc } from "@/utils/pinecone/client";
 import { getPdfText } from "@/utils/pdf-to-text";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { presignedUrlClient } from "@/utils/s3/client";
 
 export async function POST(req: NextRequest) {
   // bool variables to mark checkppoints in the upload process. used for error handling so I know where and what to delete if an upload fails
@@ -33,7 +35,7 @@ export async function POST(req: NextRequest) {
     const name = formData.get("name") as string;
     // currently only support pdfs
     if (file.type != "application/pdf") return NextResponse.json({ error: "We currently only support PDF file uploads. Please upload a PDF file instead." }, { status: 415 });
-    const filename = `user-${userId}/docs/${name}`;
+    const filename = `user-${userId}/docs/${name}.pdf`;
 
     // convert file to buffer
     const arrayBuffer = await file.arrayBuffer();
@@ -82,21 +84,30 @@ export async function POST(req: NextRequest) {
     awsFile = filename;
 
     // now we can upload the image buffer to s3
-    const previewName = `user-${userId}/previews/${formData.get("name")}`;
+    const previewName = `user-${userId}/previews/${formData.get("name")}.png`;
     const putPreviewCommand = new PutObjectCommand({
       Bucket: "docuquery-files",
       Key: previewName,
       Body: previewBuffer,
-      ContentType: file.type,
+      ContentType: "image/png",
     });
     await s3client.send(putPreviewCommand);
     awsPreview = previewName;
+
+    const getPreviewCommand = new GetObjectCommand({
+      Bucket: "docuquery-files",
+      Key: previewName,
+    });
+    const url = await getSignedUrl(presignedUrlClient, getPreviewCommand, { expiresIn: 3600 }); // 60 minutes
+    const expiry = new Date();
+    expiry.setMinutes(expiry.getMinutes() + 59); // take off a minute to be safe, it might take time for these lines of code to run
 
     // then save the preview to the table
     const prev = await prisma.preview.create({
       data: {
         documentId: pdf.id,
-        // TODO add presigned url here
+        presignedUrl: url,
+        expiry: expiry,
       },
     });
     postgresPreview = prev.id;

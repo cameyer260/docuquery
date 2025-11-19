@@ -25,14 +25,15 @@ export async function GET() {
       }
     });
 
-    // update presigned urls if need
-
+    // TODO update presigned urls if needed
+    // loop through files and get new presigned urls for previews that have expired
+    // TODO DEBUG PRESIGNED URL NOT WORKING
 
     // clean the query result and send only the necessary data back
     const data: ClientDocument[] = files.map((item) => {
       return {
         id: item.id,
-        imgUrl: "",
+        imgUrl: item.preview?.presignedUrl as string,
         title: item.name,
       }
     });

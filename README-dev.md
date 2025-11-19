@@ -1,8 +1,6 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- START USING BRANCHING IN GIT IMMEDIATELY. View the notes you took to refresh your memory.*********
-- Add fetching and displaying the files to the users.
 - Allow the users to remove files from their account.
 - Once all upload has been implemented, correctly clear s3 and pinecone of user data on their account deletion
 

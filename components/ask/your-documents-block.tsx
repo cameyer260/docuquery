@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import FileBlock from "../upload/file-block";
-import type { Document } from "@/app/upload/page";
+import type { ClientDocument } from "@/types/client-side-types";
 
 export default function YourDocumentsBlock({
   documents,
 }: {
-  documents: Document[];
+  documents: ClientDocument[];
 }) {
   const container = {
     hidden: { opacity: 0 },
@@ -28,9 +28,10 @@ export default function YourDocumentsBlock({
       initial="hidden"
       animate="show"
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full"
+      key={documents.length} // must get a key that will change when the user uploads/deletes files to trigger re render, otherwise framer-motion will only render on mount
     >
-      {documents.map((el, index) => (
-        <motion.div key={index} variants={item}>
+      {documents.map((el) => (
+        <motion.div key={el.id} variants={item}>
           <FileBlock imgUrl={el.imgUrl} title={el.title} />
         </motion.div>
       ))}

@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
         hostname: "lh3.googleusercontent.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "docuquery-files.s3.us-east-2.amazonaws.com",
+        pathname: "/**",
+      },
     ],
   },
 };
