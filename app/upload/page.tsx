@@ -44,6 +44,10 @@ export default function Upload() {
     }
   }
 
+  const handleDelete = async (id: string): Promise<void> => {
+
+  }
+
   /**
    * useEffect for fetching the users' documents
    */
@@ -166,7 +170,7 @@ export default function Upload() {
               </p>
             </div>
           ) : (
-            <YourDocumentsBlock documents={documents} />
+            <YourDocumentsBlock documents={documents} onDeleteAction={handleDelete} />
           )}
         </motion.div>
       </div>

@@ -4,8 +4,10 @@ import type { ClientDocument } from "@/types/client-side-types";
 
 export default function YourDocumentsBlock({
   documents,
+  onDeleteAction,
 }: {
   documents: ClientDocument[];
+  onDeleteAction: (id: string) => Promise<void>;
 }) {
   const container = {
     hidden: { opacity: 0 },
@@ -32,7 +34,12 @@ export default function YourDocumentsBlock({
     >
       {documents.map((el) => (
         <motion.div key={el.id} variants={item}>
-          <FileBlock imgUrl={el.imgUrl} title={el.title} />
+          <FileBlock
+            imgUrl={el.imgUrl}
+            title={el.title}
+            id={el.id}
+            onDeleteAction={onDeleteAction}
+          />
         </motion.div>
       ))}
     </motion.div>
