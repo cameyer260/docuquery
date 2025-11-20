@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import YourDocumentsBlock from "@/components/ask/your-documents-block";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Upload as UploadIcon, FileText } from "lucide-react";
+import { Upload as UploadIcon, FileText, Loader2 } from "lucide-react";
 import ErrorBanner from "@/components/global/error-banner";
 import type { ClientDocument } from "@/types/client-side-types";
 import SuccessBanner from "@/components/global/success-banner";
@@ -15,13 +15,18 @@ export default function Upload() {
   const [error, setError] = useState<boolean>(false);
   const [errorText, setErrorText] = useState<string>("An error occurred when fetching your documents. Please try again later.");
   const [success, setSuccess] = useState<boolean>(false);
+  const [successText, setSuccesText] = useState<string>("Successfully uploaded the document!");
   const [triggerRefetch, setTriggerRefetch] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const uploadFile = async (e: React.FormEvent) => {
     try {
       setSuccess(false);
+      setError(false);
       e.preventDefault();
-      if (!file) return;
+      if (!file || isUploading) return;
+
+      setIsUploading(true);
 
       const formData = new FormData();
       formData.append("file", file);
@@ -35,17 +40,52 @@ export default function Upload() {
 
       if (!res.ok) throw result.error;
 
+      setSuccesText("Successfully uploaded the document!");
       setSuccess(true);
       setTriggerRefetch(!triggerRefetch);
+
+      // Reset form
+      setFile(null);
+      setFileName("");
+      // Reset file input
+      const fileInput = document.getElementById("pdf") as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
+
     } catch (error) {
       console.error(error);
       setError(true);
       setErrorText(error as string);
+      setSuccess(false);
+    } finally {
+      setIsUploading(false);
     }
   }
 
   const handleDelete = async (id: string): Promise<void> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await fetch("/api/files/delete", {
+          method: "DELETE",
+          body: JSON.stringify({
+            id: id,
+          })
+        });
+        const result = await res.json();
 
+        if (!res.ok) throw result.error;
+
+        setSuccesText("Successfully deleted the document!");
+        setSuccess(true);
+        setTriggerRefetch(!triggerRefetch);
+        resolve();
+      } catch (error) {
+        console.error(error);
+        setError(true);
+        setErrorText(error as string);
+        setSuccess(false);
+        reject(error);
+      }
+    })
   }
 
   /**
@@ -83,7 +123,7 @@ export default function Upload() {
         <ErrorBanner text={errorText} />
       )}
       {success && (
-        <SuccessBanner text={"Successfully uploaded document!"} />
+        <SuccessBanner text={successText} />
       )}
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -118,7 +158,9 @@ export default function Upload() {
                 type="text"
                 name="pdf"
                 placeholder="Enter a name for your PDF"
+                value={fileName}
                 onChange={(e) => setFileName(e.target.value)}
+                disabled={isUploading}
                 required
                 className="w-full"
               />
@@ -134,16 +176,26 @@ export default function Upload() {
                 accept=".pdf"
                 name="pdf"
                 required
+                disabled={isUploading}
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="w-full"
               />
             </div>
 
-            <Input
+            <button
               type="submit"
-              value="Upload and Ingest"
-              className="w-full mt-2 bg-primary hover:bg-primary/90 cursor-pointer"
-            />
+              disabled={isUploading || !file || !fileName}
+              className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-4 py-2 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Uploading and Ingesting...
+                </>
+              ) : (
+                "Upload and Ingest"
+              )}
+            </button>
 
           </form>
         </motion.div>
