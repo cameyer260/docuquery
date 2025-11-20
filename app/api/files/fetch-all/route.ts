@@ -19,7 +19,7 @@ export async function GET() {
     const userId = session?.user?.id;
 
     // get the user's files metadata from postgres first
-    const files = await prisma.document.findMany({
+    let files = await prisma.document.findMany({
       where: {
         userId: userId,
       },
@@ -29,8 +29,8 @@ export async function GET() {
     });
 
     // loop through files and get new presigned urls for previews that have expired
-    files.map(async (value) => {
-      if (value.preview?.expiry && value.preview.expiry > new Date(new Date().toUTCString())) {
+    files = await Promise.all(files.map(async (value) => {
+      if (value.preview?.expiry && value.preview.expiry < new Date(new Date().toUTCString())) {
         const getPreviewCommand = new GetObjectCommand({
           Bucket: "docuquery-files",
           Key: `user-${userId}/previews/${value.name}.png`,
@@ -49,8 +49,13 @@ export async function GET() {
             expiry: expiry,
           },
         });
+
+        // then update the data we are returning
+        value.preview.expiry = expiry;
+        value.preview.presignedUrl = url;
       }
-    })
+      return value;
+    }))
 
     // clean the query result and send only the necessary data back
     const data: ClientDocument[] = files.map((item) => {
