@@ -1,7 +1,6 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- Allow the users to remove files from their account.
 - Once all upload has been implemented, correctly clear s3 and pinecone of user data on their account deletion
 
 ### Remember
