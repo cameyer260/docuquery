@@ -20,7 +20,7 @@ export async function DELETE(req: NextRequest) {
 
     // now try to delete the file
     // postgres before s3, preview goes first due to dependency on file parent
-    const preview = await prisma.preview.delete({
+    await prisma.preview.delete({
       where: {
         documentId: body.id,
       }
