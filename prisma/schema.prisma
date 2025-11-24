@@ -117,6 +117,7 @@ model Message {
   id            String    @id @default(cuid())
   logId         String
   text          String
+  createdAt     DateTime  @default(now())
   role          Role
 
   log           Log       @relation(fields: [logId], references: [id]) // log to message relationship is one to many. a log can have many messages

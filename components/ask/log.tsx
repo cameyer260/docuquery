@@ -4,7 +4,6 @@ import Loading from "@/app/loading";
 import { Button } from "../ui/button";
 import { ArrowUpIcon, Sparkles } from "lucide-react";
 import { AutoResizeTextarea } from "./auto-resize-textarea";
-import Form from "next/form";
 import { Input } from "../ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import ErrorBanner from "../global/error-banner";
@@ -42,12 +41,10 @@ export default function Log({ title }: { title: string }) {
     },
   ]);
   const [newMessage, setNewMessage] = useState<string>("");
-  const [triggerRefetch, setTriggerRefetch] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        setLoading(true);
         const res = await fetch(`/api/ask/${title}`, {
           method: "GET"
         });
@@ -72,7 +69,7 @@ export default function Log({ title }: { title: string }) {
 
     fetchLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerRefetch]);
+  }, []);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -82,10 +79,32 @@ export default function Log({ title }: { title: string }) {
   /**
    * send the message to /api/ask/filename. POST request
    */
-  const sendMessage = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log(newMessage);
-    setTriggerRefetch(!triggerRefetch);
+  const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
+      console.log(newMessage);
+      const res = await fetch(`/api/ask/${title}`, {
+        method: "POST",
+        body: JSON.stringify({ prompt: newMessage }),
+        headers: { "Content-Type": "application/json" }
+      });
+      const result = await res.json();
+      if (res.status === 404) setFound(false);
+      if (!res.ok) throw result.error;
+
+      console.log(result);
+      // update local messages with response back
+
+      setLocalError(false);
+      setLocalErrorText("We ran into an error fetching the chat log. Please try again later.");
+      setLoading(false);
+      setFound(true);
+    } catch (error) {
+      console.error(error);
+      setLocalError(true);
+      setLocalErrorText(error as string);
+      setLoading(false);
+    }
   };
 
   if (loading) return <Loading />;
@@ -129,7 +148,7 @@ export default function Log({ title }: { title: string }) {
 
         {/* Input Bar */}
         <div className="border-t p-4 bg-card/50 backdrop-blur-sm">
-          <Form action="/api/chat" className="flex gap-2 items-center">
+          <form onSubmit={sendMessage} className="flex gap-2 items-center">
             <Input
               type="text"
               name="message"
@@ -144,7 +163,7 @@ export default function Log({ title }: { title: string }) {
             >
               Send
             </Button>
-          </Form>
+          </form>
         </div>
       </div>
     ) : (
