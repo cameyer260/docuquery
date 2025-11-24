@@ -1,6 +1,5 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -86,6 +85,7 @@ model Document {
   name        String    @unique
   createdAt   DateTime  @default(now())
   preview     Preview?
+  log         Log?
  
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade) // user to document is a one to many relationship. the user "owns" many documents
   @@unique([userId, name]) // unique document name per user
@@ -98,4 +98,26 @@ model Preview {
   expiry        DateTime?         // when it expires
   
   document    Document    @relation(fields: [documentId], references: [id]) // preview to document relationship is one to one. documents own one or zero previews
+}
+
+enum Role {
+  USER 
+  AGENT
+}
+
+model Log {
+  id            String    @id @default(cuid())
+  documentId    String    @unique // ensure 1-1 relationship
+  messages      Message[]
+
+  document    Document    @relation(fields: [documentId], references: [id]) // log to document relationship is one to one. documents own one or zero logs
+}
+
+model Message {
+  id            String    @id @default(cuid())
+  logId         String
+  text          String
+  role          Role
+
+  log           Log       @relation(fields: [logId], references: [id]) // log to message relationship is one to many. a log can have many messages
 }
