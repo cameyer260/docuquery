@@ -14,8 +14,8 @@ export default async function Navbar() {
       </div>
       <div className="flex gap-8">
         <ModeToggle />
-        <Link href="/upload">Upload</Link>
-        <Link href="/ask">Ask</Link>
+        <Link href="/main/upload">Upload</Link>
+        <Link href="/main/ask">Ask</Link>
         <Link href="/about">About</Link>
         {session ? (
           <UserAccount session={session} />

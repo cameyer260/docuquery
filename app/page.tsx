@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 export default async function Home() {
   const session = await getServerSession(authOptions);
 
-  if (session) redirect("/upload");
+  if (session) redirect("/main/upload");
 
   return (
     <div className="flex flex-col p-12 gap-12">

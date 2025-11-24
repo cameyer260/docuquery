@@ -40,7 +40,7 @@ export default function FileBlock({
 
   return (
     <div className="relative group">
-      <Link href={`/ask/${title}`}>
+      <Link href={`/main/ask/${title}`}>
         <div className="flex flex-col border border-foreground/10 rounded-xl shadow-md hover:shadow-lg bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out hover:scale-105">
           <div className="p-6 border-b border-foreground/10 w-full flex items-center justify-center">
             <div className="w-[120px] h-[120px] relative bg-white">

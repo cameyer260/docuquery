@@ -1,23 +1,19 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import YourDocumentsBlock from "@/components/ask/your-documents-block";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Upload as UploadIcon, FileText, Loader2 } from "lucide-react";
 import ErrorBanner from "@/components/global/error-banner";
-import type { ClientDocument } from "@/types/client-side-types";
 import SuccessBanner from "@/components/global/success-banner";
+import { useData } from "@/app/context/FileMetadataContext";
+import Loading from "@/app/loading";
 
 export default function Upload() {
-  const [documents, setDocuments] = useState<ClientDocument[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
-  const [error, setError] = useState<boolean>(false);
-  const [errorText, setErrorText] = useState<string>("An error occurred when fetching your documents. Please try again later.");
-  const [success, setSuccess] = useState<boolean>(false);
-  const [successText, setSuccesText] = useState<string>("Successfully uploaded the document!");
-  const [triggerRefetch, setTriggerRefetch] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const { documents, error, setError, errorText, setErrorText, success, setSuccess, successText, setSuccessText, triggerRefetch, setTriggerRefetch, loading } = useData();
 
   const uploadFile = async (e: React.FormEvent) => {
     try {
@@ -40,7 +36,7 @@ export default function Upload() {
 
       if (!res.ok) throw result.error;
 
-      setSuccesText("Successfully uploaded the document!");
+      setSuccessText("Successfully uploaded the document!");
       setSuccess(true);
       setTriggerRefetch(!triggerRefetch);
 
@@ -74,7 +70,7 @@ export default function Upload() {
 
         if (!res.ok) throw result.error;
 
-        setSuccesText("Successfully deleted the document!");
+        setSuccessText("Successfully deleted the document!");
         setSuccess(true);
         setTriggerRefetch(!triggerRefetch);
         resolve();
@@ -88,34 +84,7 @@ export default function Upload() {
     })
   }
 
-  /**
-   * useEffect for fetching the users' documents
-   */
-  useEffect(() => {
-    const fetchFilesMetadata = async () => {
-      try {
-        const res = await fetch("/api/files/fetch-all", {
-          method: "GET"
-        });
-        const result = await res.json();
-        if (!res.ok) throw result.error;
-
-        // loop the result payload and set our client docs accordingly
-        setDocuments(result.payload.map((item: ClientDocument) => {
-          return { imgUrl: item.imgUrl, title: item.title, id: item.id };
-        }));
-
-        setError(false);
-        setErrorText("An error occurred when fetching your documents. Please try again later.");
-      } catch (error) {
-        console.error(error);
-        setError(true);
-        setErrorText(error as string);
-      }
-    }
-
-    fetchFilesMetadata();
-  }, [triggerRefetch]);
+  if (loading) return <Loading />;
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">

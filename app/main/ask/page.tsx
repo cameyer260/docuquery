@@ -1,35 +1,49 @@
 "use client";
 import YourDocumentsBlock from "@/components/ask/your-documents-block";
-import type { Document } from "../upload/page";
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, FileText, Sparkles } from "lucide-react";
+import ErrorBanner from "@/components/global/error-banner";
+import SuccessBanner from "@/components/global/success-banner";
+import { useData } from "@/app/context/FileMetadataContext";
 
 export default function Ask() {
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const { documents, error, setError, errorText, setErrorText, success, setSuccess, successText, setSuccessText, triggerRefetch, setTriggerRefetch } = useData();
 
-  /**
-   * useEffect for fetching the users' documents
-   */
-  useEffect(() => {
-    // set documents here
-    setDocuments([
-      { imgUrl: "/upload/document.png", title: "file1" },
-      { imgUrl: "/upload/document.png", title: "file2" },
-      { imgUrl: "/upload/document.png", title: "file3" },
-      { imgUrl: "/upload/document.png", title: "file4" },
-      { imgUrl: "/upload/document.png", title: "file5" },
-      { imgUrl: "/upload/document.png", title: "file6" },
-      { imgUrl: "/upload/document.png", title: "file7" },
-      { imgUrl: "/upload/document.png", title: "file8" },
-      { imgUrl: "/upload/document.png", title: "file9" },
-      { imgUrl: "/upload/document.png", title: "file10" },
-      { imgUrl: "/upload/document.png", title: "file11" },
-    ]);
-  }, []);
+  const handleDelete = async (id: string): Promise<void> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await fetch("/api/files/delete", {
+          method: "DELETE",
+          body: JSON.stringify({
+            id: id,
+          })
+        });
+        const result = await res.json();
+
+        if (!res.ok) throw result.error;
+
+        setSuccessText("Successfully deleted the document!");
+        setSuccess(true);
+        setTriggerRefetch(!triggerRefetch);
+        resolve();
+      } catch (error) {
+        console.error(error);
+        setError(true);
+        setErrorText(error as string);
+        setSuccess(false);
+        reject(error);
+      }
+    })
+  }
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      {error && (
+        <ErrorBanner text={errorText} />
+      )}
+      {success && (
+        <SuccessBanner text={successText} />
+      )}
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -64,7 +78,7 @@ export default function Ask() {
               </p>
             </div>
           ) : (
-            <YourDocumentsBlock documents={documents} />
+            <YourDocumentsBlock documents={documents} onDeleteAction={handleDelete} />
           )}
         </motion.div>
       </div>

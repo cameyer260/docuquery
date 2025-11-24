@@ -1,30 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
 import Loading from "@/app/loading";
 import ErrorBanner from "../global/error-banner";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FileText, MessageSquare } from "lucide-react";
+import { useData } from "@/app/context/FileMetadataContext";
 
 export default function LogsSidebar() {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
-  const [titles, setTitles] = useState<string[]>([
-    "doctitle1",
-    "doctitle2",
-    "doctitle3",
-    "doctitle4",
-    "doctitle5",
-    "doctitle6",
-    "doctitle7",
-    "doctitle8",
-  ]);
-
-  useEffect(() => {
-    const res = true;
-    setLoading(false);
-    if (!res) setError(true);
-  }, []);
+  const { documents, error, loading } = useData();
 
   const container = {
     hidden: { opacity: 0 },
@@ -65,14 +48,14 @@ export default function LogsSidebar() {
           animate="show"
           className="flex-1 overflow-y-auto"
         >
-          {titles.map((el, i) => (
+          {documents.map((el, i) => (
             <motion.div key={i} variants={item}>
               <Link
                 className="border-b py-3 px-4 flex items-center gap-3 hover:bg-accent transition-colors group"
-                href={`/ask/${el}`}
+                href={`/main/ask/${el.title}`}
               >
                 <FileText className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                <span className="truncate text-sm">{el}</span>
+                <span className="truncate text-sm">{el.title}</span>
               </Link>
             </motion.div>
           ))}
