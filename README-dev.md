@@ -1,10 +1,7 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- set up gpt api connection
-- make api route that takes user's prompt, sends it to pinecone for similarity search, and combines the top k results with instructions and the user's prompt and sends it to gpt api,
-then sends the response back to the user
-- handle the fronted to update that correctly as well
+- finish integrating the ask process. pickup at TODO on line 96 of /api/ask/[filename]/route.ts
 - leave todo notes for rate limiting
 
 ### Remember

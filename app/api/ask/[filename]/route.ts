@@ -80,7 +80,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
     });
     if (!document) return NextResponse.json({ error: `User does not own a document of name: ${filename}` }, { status: 404 });
 
-    // TODO then we save their prompt to the db logs
+    // then we save the prompt to the logs. first create the log if it does not already exist. just use upsert to do that
+    await prisma.log.upsert({
+      where: {
+        documentId: document.id
+      },
+      update: {
+        documentId: document.id
+      },
+      create: {
+        documentId: document.id
+      }
+    });
+    // now we can add the new prompt to it
+    // TODO create message and attach it to the log
 
     // then we send their message to the pinecone api for similarity search
     const namespace = pc.index("docuquery", "https://docuquery-38emsw1.svc.aped-4627-b74a.pinecone.io").namespace(userId);
