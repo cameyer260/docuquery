@@ -17,8 +17,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
       );
     const userId = session?.user?.id;
 
-    // TODO add rate limiting here.
-
     // first, we fetch the document they want to chat with
     const document = await prisma.document.findUnique({
       where: {
@@ -75,7 +73,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
       );
     const userId = session?.user?.id;
 
-    // TODO add rate limiting here.
+    // check that their prompt does not exceed the limit of 175 chars
+    if (prompt.length > 175) return NextResponse.json({ error: "Prompt exceeds max length of 175 characters. Please trim down the prompt and try again." }, { status: 413 });
 
     // first, we fetch the document they want to chat with
     const document = await prisma.document.findUnique({
@@ -85,6 +84,50 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
       }
     });
     if (!document) return NextResponse.json({ error: `User does not own a document of name: ${filename}` }, { status: 404 });
+
+    // now we can check if they have hit the daily rate limit and refuse service if so
+    // first try to get the rate limit record
+    let rateLimit = await prisma.rateLimit.findUnique({
+      where: {
+        userId: userId
+      }
+    });
+    // if it does not exist, just create one then move on (they havent reached any daily limit yet)
+    if (!rateLimit) {
+      rateLimit = await prisma.rateLimit.create({
+        data: {
+          userId: userId,
+        }
+      });
+    } else {
+      // if it does exist, just check that they have not hit the daily limit for promts (15). if they have reject service, else move on
+      // to do this we first need to make sure the record is not expired, which in that case we will not reject service, we will just create a new record for them an move on
+      // check if expired. compare the utc timestamp of the record with current date constructed using millseconds in utc, then subtracted 1 day in millseconds from, and instantiated to a new date that can be compared with the utc string from the record
+      const expired = rateLimit.date <= new Date(Date.now() - 24 * 60 * 60 * 1000);
+      if (expired) {
+        await prisma.rateLimit.delete({
+          where: {
+            userId: userId
+          }
+        });
+        await prisma.rateLimit.create({
+          data: {
+            userId: userId,
+          }
+        });
+      } else if (rateLimit.prompt_uploads >= 15) {
+        // case that it has not expired AND they have hit the limit, in which case we have to reject service
+        const refreshesAt = rateLimit.date;
+        refreshesAt.setDate(refreshesAt.getDate() + 1); // append 1 day to the date (when the limit will refresh)
+        const diffMs = refreshesAt.getTime() - Date.now();
+        const totalMinutes = Math.max(0, Math.ceil(diffMs / (1000 * 60)));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return NextResponse.json({ error: `You’ve reached the free-tier daily upload limit of 2 files. Your limit will refresh in ${hours} hours and ${minutes} minutes.` }, { status: 429 });
+      }
+    }
+    // end of rate limiting check block
 
     // then we save the prompt to the logs. first create the log if it does not already exist. just use upsert to do that
     const log = await prisma.log.upsert({
@@ -138,6 +181,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
         logId: log.id,
         text: response.output_text,
         role: 'AGENT',
+      }
+    });
+
+    // on success we can update their rate limit here as well
+    await prisma.rateLimit.update({
+      where: {
+        userId: userId
+      },
+      data: {
+        prompt_uploads: rateLimit.prompt_uploads + 1 // just add one to what the record from earlier held
       }
     });
 

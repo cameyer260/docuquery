@@ -227,6 +227,7 @@ export default function Log({ title }: { title: string }) {
         <form onSubmit={sendMessage} className="flex gap-2 items-center">
           <Input
             type="text"
+            maxLength={175}
             name="message"
             disabled={sending}
             value={newMessage}
@@ -265,7 +266,7 @@ export default function Log({ title }: { title: string }) {
         </p>
         <div className="flex gap-4 items-end">
           <AutoResizeTextarea
-            maxLength={150}
+            maxLength={175}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type your question here..."

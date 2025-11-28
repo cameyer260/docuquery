@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     // currently only support pdfs
     if (file.type != "application/pdf") return NextResponse.json({ error: "We currently only support PDF file uploads. Please upload a PDF file instead." }, { status: 415 });
     // enforce max size of 5 mb for a file
-    if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: "File size must not exceed 5 MB." }, { status: 429 });
+    if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: "File size must not exceed 5 MB." }, { status: 413 });
     // check if the user has already uploaded a file with that name
     const exists = await prisma.document.findFirst({
       where: {
