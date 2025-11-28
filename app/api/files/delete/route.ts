@@ -19,10 +19,16 @@ export async function DELETE(req: NextRequest) {
     const body = await req.json();
 
     // now try to delete the file
-    // postgres before s3, preview goes first due to dependency on file parent
-    await prisma.preview.delete({
+    // postgres before s3, preview goes first due to dependency on file parent (use delete many to prevent throwing an error if the record dne, could happen on previous deletion failures)
+    await prisma.preview.deleteMany({
       where: {
         documentId: body.id,
+      }
+    });
+    // then delete the log which also has a dependency on the file
+    await prisma.log.deleteMany({
+      where: {
+        documentId: body.id
       }
     });
     // now delete postgres file 

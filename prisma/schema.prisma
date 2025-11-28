@@ -121,7 +121,7 @@ model Message {
   createdAt     DateTime  @default(now())
   role          Role
 
-  log           Log       @relation(fields: [logId], references: [id]) // log to message relationship is one to many. a log can have many messages
+  log           Log       @relation(fields: [logId], references: [id], onDelete: Cascade) // log to message relationship is one to many. a log can have many messages
 }
 
 // a rate limit record will be created for each day the user logs on and uses the site (uploads or prompts). once they hit the limit they will be refused service 
