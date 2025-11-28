@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         documents: true,
       },
     });
-    if (user && user.documents.length >= 5) return NextResponse.json({ error: "You’ve reached the free-tier limit of 5 uploaded files. Please remove a file before uploading another. You can find more details about rate limits on our Terms & Conditions page." }, {
+    if (user && user.documents.length >= 5) return NextResponse.json({ error: "You’ve reached the free-tier limit of 5 uploaded files. Please remove a file before uploading another. You can find more details about rate limits on our billing page." }, {
       status: 429
     });
 
