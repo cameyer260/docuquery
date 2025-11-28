@@ -18,6 +18,7 @@ model User {
   documents     Document[]
   // Optional for WebAuthn support
   Authenticator Authenticator[]
+  rateLimit     RateLimit?
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -121,4 +122,18 @@ model Message {
   role          Role
 
   log           Log       @relation(fields: [logId], references: [id]) // log to message relationship is one to many. a log can have many messages
+}
+
+// a rate limit record will be created for each day the user logs on and uses the site (uploads or prompts). once they hit the limit they will be refused service 
+// until the date is one day old, where the current record will be deleted and replaced with a new one for that new active day. simplifies checking in the api, 
+// I can just check if it exists, and what the counts are at and if it is still valid (not one day old or more). if they hit the limit refuse service else just
+// update the count by either updating the existing valid unexpired record or creating a new one for the day
+model RateLimit {
+  id                String    @id @default(cuid())
+  userId            String    @unique // ensure 1-1 relationship
+  file_uploads      Int       @default(0)
+  prompt_uploads    Int       @default(0)
+  date              DateTime  @default(now())
+
+  user              User      @relation(fields: [userId], references: [id]) // user to RateLimit is a one to one relationship. the user "owns" one or zero rate limits, rate limits must be tied to a user
 }
