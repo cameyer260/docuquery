@@ -139,8 +139,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
       },
       create: {
         documentId: document.id
+      },
+    });
+    // before we move on, check that the log has not reached a length of 100. if it has the user will need to move on to a new log, either deleting this one and creating a new one or just creating a new one
+    const messageCount = await prisma.message.count({
+      where: {
+        logId: log.id
       }
     });
+    if (messageCount > 100) return NextResponse.json({ error: "You have reached the max size of a conversation of 100 messages. Please move on to another log to continue." }, { status: 429 });
     // now we can add the new prompt to it
     await prisma.message.create({
       data: {
