@@ -32,12 +32,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     let log = await prisma.log.findUnique({
       where: {
         documentId: document.id,
+      },
+      include: {
+        messages: true,
       }
     });
     // if one has not been created just create one, else return the existing log with the messages attatched to it
     if (!log) log = await prisma.log.create({
       data: {
         documentId: document.id
+      },
+      include: {
+        messages: true,
       }
     });
 
@@ -81,7 +87,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
     if (!document) return NextResponse.json({ error: `User does not own a document of name: ${filename}` }, { status: 404 });
 
     // then we save the prompt to the logs. first create the log if it does not already exist. just use upsert to do that
-    await prisma.log.upsert({
+    const log = await prisma.log.upsert({
       where: {
         documentId: document.id
       },
@@ -93,7 +99,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
       }
     });
     // now we can add the new prompt to it
-    // TODO create message and attach it to the log
+    await prisma.message.create({
+      data: {
+        logId: log.id,
+        text: prompt,
+        role: 'USER',
+      }
+    });
 
     // then we send their message to the pinecone api for similarity search
     const namespace = pc.index("docuquery", "https://docuquery-38emsw1.svc.aped-4627-b74a.pinecone.io").namespace(userId);
@@ -121,10 +133,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
         ${contextString}`,
       input: prompt,
     });
-    // TODO then we save the response from the gpt to the logs
+    const finalResponse = await prisma.message.create({
+      data: {
+        logId: log.id,
+        text: response.output_text,
+        role: 'AGENT',
+      }
+    });
 
     // then we send the user the response from the gpt along with the relevant vectors for citation info
-    return NextResponse.json({ payload: { response: response.output_text, citation: similarVectors.result.hits } }, { status: 200 });
+    return NextResponse.json({ payload: { response: finalResponse, citation: similarVectors.result.hits } }, { status: 200 });
 
   } catch (error) {
     console.error(error);

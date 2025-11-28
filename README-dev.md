@@ -1,7 +1,7 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- finish integrating the ask process. pickup at TODO on line 96 of /api/ask/[filename]/route.ts
+- add citations to responses
 - leave todo notes for rate limiting
 
 ### Remember
