@@ -124,7 +124,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
         const hours = Math.floor(totalMinutes / 60);
         const minutes = totalMinutes % 60;
 
-        return NextResponse.json({ error: `You’ve reached the free-tier daily upload limit of 2 files. Your limit will refresh in ${hours} hours and ${minutes} minutes.` }, { status: 429 });
+        return NextResponse.json({ error: `You’ve reached the free-tier daily prompt limit of 15 prompts. Your limit will refresh in ${hours} hours and ${minutes} minutes.` }, { status: 429 });
       }
     }
     // end of rate limiting check block
