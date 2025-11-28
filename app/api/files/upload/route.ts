@@ -27,21 +27,16 @@ export async function POST(req: NextRequest) {
       );
     const userId = session?.user?.id;
 
-    // TODO add rate limiting here. limit the file size as well
-
+    // handle all checks before the rate limiting so that we do not incorrectly update the users' rate counts when the file never actually uploaded.
     // harvest the formdata. expect file and name
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const name = formData.get("name") as string;
     // currently only support pdfs
     if (file.type != "application/pdf") return NextResponse.json({ error: "We currently only support PDF file uploads. Please upload a PDF file instead." }, { status: 415 });
-    const filename = `user-${userId}/docs/${name}.pdf`;
-
-    // convert file to buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const fileBuffer = Buffer.from(arrayBuffer);
-
-    // first check if the user has already uploaded a file with that name
+    // enforce max size of 5 mb for a file
+    if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: "File size must not exceed 5 MB." }, { status: 429 });
+    // check if the user has already uploaded a file with that name
     const exists = await prisma.document.findFirst({
       where: {
         userId: userId,
@@ -49,6 +44,68 @@ export async function POST(req: NextRequest) {
       },
     });
     if (exists) return NextResponse.json({ error: "Please choose a unique file name, you already have one under that name." }, { status: 409 });
+
+    // first step of rate limiting, enforce max of 5 uploaded files at once
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId
+      },
+      include: {
+        documents: true,
+      },
+    });
+    if (user && user.documents.length >= 5) return NextResponse.json({ error: "You’ve reached the free-tier limit of 5 uploaded files. Please remove a file before uploading another. You can find more details about rate limits on our Terms & Conditions page." }, {
+      status: 429
+    });
+
+    // here is where we strictly check the rate limits for the user and decline service if needed. on success, at the end of the block we will then update the rate limit, that we we are not counting failed requests into the limit counts
+    // first try to get the users' rate limit record
+    let rateLimit = await prisma.rateLimit.findUnique({
+      where: {
+        userId: userId
+      }
+    });
+    // if it does not exist, just create one then move on (they havent reached any daily limit yet)
+    if (!rateLimit) {
+      rateLimit = await prisma.rateLimit.create({
+        data: {
+          userId: userId,
+        }
+      });
+    } else {
+      // if it does exist, just check that they have not hit the daily limit for file uploads (2). if they have reject service, else move on
+      // to do this we first need to make sure the record is not expired, which in that case we will not reject service, we will just create a new record for them an move on
+      // check if expired. compare the utc timestamp of the record with current date constructed using millseconds in utc, then subtracted 1 day in millseconds from, and instantiated to a new date that can be compared with the utc string from the record
+      const expired = rateLimit.date <= new Date(Date.now() - 24 * 60 * 60 * 1000);
+      if (expired) {
+        await prisma.rateLimit.delete({
+          where: {
+            userId: userId
+          }
+        });
+        await prisma.rateLimit.create({
+          data: {
+            userId: userId,
+          }
+        });
+      } else if (rateLimit.file_uploads >= 2) {
+        // case that it has not expired AND they have hit the limit, in which case we have to reject service
+        const refreshesAt = rateLimit.date;
+        refreshesAt.setDate(refreshesAt.getDate() + 1); // append 1 day to the date (when the limit will refresh)
+        const diffMs = refreshesAt.getTime() - Date.now();
+        const totalMinutes = Math.max(0, Math.ceil(diffMs / (1000 * 60)));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return NextResponse.json({ error: `You’ve reached the free-tier daily upload limit of 2 files. Your limit will refresh in ${hours} hours and ${minutes} minutes.` }, { status: 429 });
+      }
+    }
+    // end of rate limiting check block
+
+    const filename = `user-${userId}/docs/${name}.pdf`;
+    // convert file to buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const fileBuffer = Buffer.from(arrayBuffer);
 
     // create image preview to upload with the doc itself
     const previewBuffer = await getPdfPreview(fileBuffer);
@@ -124,6 +181,16 @@ export async function POST(req: NextRequest) {
       namespace: userId,
       pdfId: pdf.id,
     };
+
+    // lastly, we can now update the user's rate limit record to reflect the successful upload 
+    await prisma.rateLimit.update({
+      where: {
+        userId: userId
+      },
+      data: {
+        file_uploads: rateLimit.file_uploads + 1 // just add one to what the record from earlier held
+      }
+    });
 
     return NextResponse.json({ payload: "Successfully uploaded the file." }, { status: 200 });
 

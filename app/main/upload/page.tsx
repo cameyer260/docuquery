@@ -13,7 +13,20 @@ export default function Upload() {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  const { documents, error, setError, errorText, setErrorText, success, setSuccess, successText, setSuccessText, triggerRefetch, setTriggerRefetch, loading } = useData();
+  const {
+    documents,
+    error,
+    setError,
+    errorText,
+    setErrorText,
+    success,
+    setSuccess,
+    successText,
+    setSuccessText,
+    triggerRefetch,
+    setTriggerRefetch,
+    loading
+  } = useData();
 
   const uploadFile = async (e: React.FormEvent) => {
     try {
@@ -21,6 +34,10 @@ export default function Upload() {
       setError(false);
       e.preventDefault();
       if (!file || isUploading) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("File size must not exceed 5 MB.");
+      }
 
       setIsUploading(true);
 
@@ -43,31 +60,30 @@ export default function Upload() {
       // Reset form
       setFile(null);
       setFileName("");
-      // Reset file input
       const fileInput = document.getElementById("pdf") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
-
     } catch (error) {
       console.error(error);
       setError(true);
-      setErrorText(error as string);
+      if (error instanceof Error) {
+        setErrorText(error.message)
+      } else {
+        setErrorText(String(error));
+      }
       setSuccess(false);
     } finally {
       setIsUploading(false);
     }
-  }
+  };
 
   const handleDelete = async (id: string): Promise<void> => {
     return new Promise(async (resolve, reject) => {
       try {
         const res = await fetch("/api/files/delete", {
           method: "DELETE",
-          body: JSON.stringify({
-            id: id,
-          })
+          body: JSON.stringify({ id }),
         });
         const result = await res.json();
-
         if (!res.ok) throw result.error;
 
         setSuccessText("Successfully deleted the document!");
@@ -81,19 +97,15 @@ export default function Upload() {
         setSuccess(false);
         reject(error);
       }
-    })
-  }
+    });
+  };
 
   if (loading) return <Loading />;
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      {error && (
-        <ErrorBanner text={errorText} />
-      )}
-      {success && (
-        <SuccessBanner text={successText} />
-      )}
+      {error && <ErrorBanner text={errorText} />}
+      {success && <SuccessBanner text={successText} />}
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -149,6 +161,9 @@ export default function Upload() {
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="w-full"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Maximum file size: 5 MB
+              </p>
             </div>
 
             <button
@@ -165,7 +180,6 @@ export default function Upload() {
                 "Upload and Ingest"
               )}
             </button>
-
           </form>
         </motion.div>
 
