@@ -6,7 +6,8 @@
 1. Max of 5 files uploaded at once, max of two file uploads per day. max size of file will be 5mb DONE
 2. Max of 15 questions per day on all files combined. max length of the prompt they send will be 175 chars (not including the document context) DONE
 3. Chat logs have max length of 100 messages before the user is prompted to either delete it or start a new chat log DONE
-- delete any rate limit records on user deletion
+- delete any rate limit records on user deletion DONE
+- update terms and conditions page to reflect these rate limits
 - deploy, go through all remembers relevant to deployment
 
 ### Remember

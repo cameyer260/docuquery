@@ -20,15 +20,26 @@ export async function POST(req: NextRequest) {
 
     // before deleting their account, we need to delete all of their files and previews.
     // start with postgres (source of truth), then s3, then pinecone
+    // delete their rate limit record if it exists
+    await prisma.rateLimit.deleteMany({
+      where: {
+        userId: userId
+      }
+    });
     // first get all the documents the user owns so we know what to delete
     const docs = await prisma.document.findMany({
       where: {
         userId: userId,
       }
     });
-    // delete each preview tied to each doc the user owns
+    // delete each preview and log tied to each doc the user owns
     for (const doc of docs) {
       await prisma.preview.delete({
+        where: {
+          documentId: doc.id,
+        }
+      });
+      await prisma.log.delete({
         where: {
           documentId: doc.id,
         }
