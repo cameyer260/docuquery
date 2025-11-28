@@ -2,15 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import NotFound from "@/app/not-found";
 import Loading from "@/app/loading";
 import { Button } from "../ui/button";
-import { ArrowUpIcon, Sparkles } from "lucide-react";
+import { ArrowUpIcon, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { AutoResizeTextarea } from "./auto-resize-textarea";
 import { Input } from "../ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import ErrorBanner from "../global/error-banner";
 import type { Message } from "@prisma/client";
 
+interface VectorResult {
+  text: string;
+  similarity: number;
+}
+
 interface ChatMessage {
-  role: "USER" | "ASSISTANT";
+  role: "USER" | "AGENT";
   content: string;
   timestamp: string;
 }
@@ -25,6 +30,8 @@ export default function Log({ title }: { title: string }) {
   const [data, setData] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [latestVectors, setLatestVectors] = useState<VectorResult[]>([]);
+  const [showVectors, setShowVectors] = useState(false);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -71,7 +78,7 @@ export default function Log({ title }: { title: string }) {
       const message = newMessage;
       setNewMessage("");
 
-      // Optimistically add user message
+      // add user message
       setData((prev) => [
         ...prev,
         {
@@ -91,7 +98,17 @@ export default function Log({ title }: { title: string }) {
       if (res.status === 404) setFound(false);
       if (!res.ok) throw result.error;
 
-      // Add assistant response
+      // update citation for latest response. currently only supporting showing the citations for the latest prompt, they are not stored anywhere
+      // @ts-expect-error not dealing with making a type for the vectors returned
+      setLatestVectors(result.payload.citation.map((el) => {
+        return {
+          text: el.fields.text,
+          similarity: el._score,
+        }
+      }));
+      setShowVectors(false); // reset to collapsed state
+
+      // add assistant response
       setData((prev) => [
         ...prev,
         {
@@ -122,30 +139,85 @@ export default function Log({ title }: { title: string }) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
         <AnimatePresence mode="popLayout">
-          {data.map((el, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              className={`flex w-full ${el.role === "USER" ? "justify-end" : "justify-start"
-                }`}
-            >
-              <div
-                className={`max-w-[70%] rounded-lg p-3 text-sm shadow-sm ${el.role === "USER"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card border"
+          {data.map((el, index) => {
+            const isLatestAssistant =
+              el.role === "AGENT" && index === data.length - 1;
+
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className={`flex w-full ${el.role === "USER" ? "justify-end" : "justify-start"
                   }`}
               >
-                <p>{el.content}</p>
-                <p className="text-xs opacity-70 mt-1">
-                  {el.role === "USER" ? "You" : "Assistant"} •{" "}
-                  {new Date(el.timestamp).toLocaleTimeString()}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+                <div
+                  className={`max-w-[70%] rounded-lg p-3 text-sm shadow-sm ${el.role === "USER"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card border"
+                    }`}
+                >
+                  <p>{el.content}</p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {el.role === "USER" ? "You" : "Assistant"} •{" "}
+                    {new Date(el.timestamp).toLocaleTimeString()}
+                  </p>
+
+                  {/* Vector Results - Only for latest assistant message */}
+                  {isLatestAssistant && latestVectors.length > 0 && (
+                    <div className="mt-3 border-t pt-2">
+                      <button
+                        onClick={() => setShowVectors(!showVectors)}
+                        className="flex items-center gap-1 text-xs font-medium hover:opacity-70 transition-opacity"
+                      >
+                        {showVectors ? (
+                          <ChevronUp className="w-3 h-3" />
+                        ) : (
+                          <ChevronDown className="w-3 h-3" />
+                        )}
+                        View Sources ({latestVectors.length} vectors)
+                      </button>
+
+                      <AnimatePresence>
+                        {showVectors && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="mt-2 space-y-2">
+                              {latestVectors.map((vector, idx) => (
+                                <div
+                                  key={idx}
+                                  className="text-xs p-2 rounded bg-background/50 border"
+                                >
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="font-medium text-muted-foreground">
+                                      Vector {idx + 1}
+                                    </span>
+                                    <span className="text-xs font-mono text-primary">
+                                      {vector.similarity.toFixed(4)}
+                                    </span>
+                                  </div>
+                                  <p className="text-muted-foreground leading-relaxed">
+                                    {vector.text}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>

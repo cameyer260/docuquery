@@ -1,8 +1,8 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- add citations to responses
-- leave todo notes for rate limiting
+- add basic rate limits (prob implement redis for that)
+- deploy, go through all remembers relevant to deployment
 
 ### Remember
 - When you deploy add basic rate limiting for read and write. In the upload route specifically, rate limit users on upload count and the size of the documents
