@@ -1,7 +1,7 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- deploy, go through all remembers relevant to deployment
+- deploy, go through all remembers and next steps relevant to deployment
 
 ### Remember
 - When you deploy add basic rate limiting for read and write. In the upload route specifically, rate limit users on upload count and the size of the documents
