@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { prisma } from "@/prisma/client";
-import { s3client } from "@/utils/s3/client";
+import { getS3Client } from "@/utils/s3/client";
 import { getPineconeClient } from "@/utils/pinecone/client";
 
 export async function DELETE(req: NextRequest) {
@@ -19,6 +19,7 @@ export async function DELETE(req: NextRequest) {
     const body = await req.json();
 
     const pc = getPineconeClient();
+    const s3client = getS3Client();
 
     // now try to delete the file
     // postgres before s3, preview goes first due to dependency on file parent (use delete many to prevent throwing an error if the record dne, could happen on previous deletion failures)

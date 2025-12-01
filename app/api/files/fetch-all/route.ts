@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import type { ClientDocument } from "@/types/client-side-types";
-import { presignedUrlClient } from "@/utils/s3/client";
+import { getPresignedUrlClient } from "@/utils/s3/client";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -17,6 +17,7 @@ export async function GET() {
         { status: 401 },
       );
     const userId = session?.user?.id;
+    const presignedUrlClient = getPresignedUrlClient();
 
     // get the user's files metadata from postgres first
     let files = await prisma.document.findMany({

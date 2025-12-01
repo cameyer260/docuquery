@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { s3client } from "@/utils/s3/client";
+import { getS3Client } from "@/utils/s3/client";
 import { DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getPineconeClient } from "@/utils/pinecone/client";
 
@@ -10,7 +10,7 @@ export async function POST() {
   try {
     const session = await getServerSession(authOptions);
     const pc = getPineconeClient();
-    if (!pc) throw new Error("Error initializing pinecone client. Please make sure the environment variables are being loaded correctly.");
+    const s3client = getS3Client();
 
     if (!session)
       return NextResponse.json(

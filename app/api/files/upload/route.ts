@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import { s3client } from "@/utils/s3/client";
+import { getS3Client } from "@/utils/s3/client";
 import { getPdfPreview } from "@/utils/pdf-to-image";
 import { prisma } from "@/prisma/client";
 import { getPineconeClient } from "@/utils/pinecone/client";
 import { getPdfText } from "@/utils/pdf-to-text";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { presignedUrlClient } from "@/utils/s3/client";
+import { getPresignedUrlClient } from "@/utils/s3/client";
 
 export async function POST(req: NextRequest) {
   // bool variables to mark checkppoints in the upload process. used for error handling so I know where and what to delete if an upload fails
@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
     const userId = session?.user?.id;
 
     const pc = getPineconeClient();
+    const s3client = getS3Client();
+    const presignedUrlClient = getPresignedUrlClient();
 
     // handle all checks before the rate limiting so that we do not incorrectly update the users' rate counts when the file never actually uploaded.
     // harvest the formdata. expect file and name
@@ -198,6 +200,8 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error(error);
+    const s3client = getS3Client();
+    const presignedUrlClient = getPresignedUrlClient();
 
     // if one upload fails, any of the successful uploads now need to be deleted. we can use these checkpoint variables that indicate which uploads happened and which did not
     // and the id/key of each upload to delete as well
