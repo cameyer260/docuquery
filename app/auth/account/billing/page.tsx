@@ -33,8 +33,6 @@ export default function Billing() {
         const result = await res.json();
         if (!res.ok) throw result.error;
 
-        console.log(result);
-
         setUploadCount(result.payload.documentUploads);
         setPromptCount(result.payload.prompts);
         setUploaded(result.payload.documentsUploaded);

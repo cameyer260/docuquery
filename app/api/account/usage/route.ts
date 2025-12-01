@@ -28,7 +28,7 @@ export async function GET() {
     });
 
     // if the user has a rate limit record and it is not expired then update counts accordingly
-    if (rateLimit && rateLimit.date <= new Date(Date.now() - 24 * 60 * 60 * 1000)) {
+    if (rateLimit && rateLimit.date > new Date(Date.now() - 24 * 60 * 60 * 1000)) {
       counts.documentUploads = rateLimit.file_uploads;
       counts.prompts = rateLimit.prompt_uploads;
     }
