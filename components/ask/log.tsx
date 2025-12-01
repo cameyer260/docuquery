@@ -252,7 +252,6 @@ export default function Log({ title }: { title: string }) {
       className="min-h-full flex flex-col items-center justify-center"
     >
       {localError && <ErrorBanner text={localErrorText} />}
-
       <form
         className="flex flex-col items-center justify-center gap-6"
         onSubmit={sendMessage}
@@ -269,6 +268,14 @@ export default function Log({ title }: { title: string }) {
             maxLength={175}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (!sending && newMessage.trim() !== "") {
+                  e.currentTarget.form?.requestSubmit();
+                }
+              }
+            }}
             placeholder="Type your question here..."
             disabled={sending}
             className="disabled:opacity-50"

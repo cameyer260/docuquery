@@ -8,6 +8,9 @@ import ErrorBanner from "@/components/global/error-banner";
 import SuccessBanner from "@/components/global/success-banner";
 import { useData } from "@/app/context/FileMetadataContext";
 import Loading from "@/app/loading";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null);
@@ -27,6 +30,13 @@ export default function Upload() {
     setTriggerRefetch,
     loading
   } = useData();
+
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") router.push("/");
+  }, [router, status]);
 
   const uploadFile = async (e: React.FormEvent) => {
     try {

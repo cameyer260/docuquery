@@ -1,9 +1,6 @@
 # Dev Notes – DocuQuery
 
 ### Current Focus
-- deploy:
-- setup github actions
-- get google oauth project published and out of "testing" via the cloud oauth api. do the same for github if needed
 
 ### Remember
 - The about and terms and conditions pages are not a finished product yet and will change throughout the entire development phase

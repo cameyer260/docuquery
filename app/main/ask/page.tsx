@@ -5,9 +5,18 @@ import { MessageSquare, FileText, Sparkles } from "lucide-react";
 import ErrorBanner from "@/components/global/error-banner";
 import SuccessBanner from "@/components/global/success-banner";
 import { useData } from "@/app/context/FileMetadataContext";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 export default function Ask() {
   const { documents, error, setError, errorText, setErrorText, success, setSuccess, successText, setSuccessText, triggerRefetch, setTriggerRefetch } = useData();
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") router.push("/");
+  }, [router, status]);
 
   const handleDelete = async (id: string): Promise<void> => {
     return new Promise(async (resolve, reject) => {

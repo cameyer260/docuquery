@@ -46,12 +46,12 @@ export default function UserAccount({
             </Link>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <button onClick={() => signOut()} className="w-full">
+          <button onClick={() => signOut({ callbackUrl: "/" })} className="w-full">
             <DropdownMenuItem>Log out</DropdownMenuItem>
           </button>
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
+    </div >
   ) : (
     <div>Loading...</div>
   );

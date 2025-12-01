@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { FileText, MessageSquare } from "lucide-react";
 import { useData } from "@/app/context/FileMetadataContext";
 
-export default function LogsSidebar() {
+export default function LogsSidebar({ title }: { title: string }) {
   const { documents, error, loading } = useData();
 
   const container = {
@@ -51,7 +51,8 @@ export default function LogsSidebar() {
           {documents.map((el, i) => (
             <motion.div key={i} variants={item}>
               <Link
-                className="border-b py-3 px-4 flex items-center gap-3 hover:bg-accent transition-colors group"
+                className={`border-b py-3 px-4 flex items-center gap-3 hover:bg-accent transition-colors group ${title && el.title === decodeURIComponent(title) ? "bg-accent" : ""
+                  }`}
                 href={`/main/ask/${el.title}`}
               >
                 <FileText className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -60,6 +61,6 @@ export default function LogsSidebar() {
             </motion.div>
           ))}
         </motion.div>
-      </div>
+      </div >
     );
 }
