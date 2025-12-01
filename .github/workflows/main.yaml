@@ -1,0 +1,40 @@
+name: CI/CD
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: CI/CD
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run build
+        run: npm run build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: success()
+    environment: CI/CD
+    steps:
+      - name: Deploy to Digital Ocean VPS via SSH
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.HOST }}
+          username: root
+          key: ${{ secrets.KEY }}
+          script: |
+            cd ~/apps/${{ secrets.NAME }}
+            git pull origin main
+            npm ci
+            npm run build
+            npx prisma migrate deploy
+            pm2 restart ${{ secrets.NAME }}
