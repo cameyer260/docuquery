@@ -5,7 +5,7 @@ import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sd
 import { s3client } from "@/utils/s3/client";
 import { getPdfPreview } from "@/utils/pdf-to-image";
 import { prisma } from "@/prisma/client";
-import { pc } from "@/utils/pinecone/client";
+import { getPineconeClient } from "@/utils/pinecone/client";
 import { getPdfText } from "@/utils/pdf-to-text";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { presignedUrlClient } from "@/utils/s3/client";
@@ -26,6 +26,8 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     const userId = session?.user?.id;
+
+    const pc = getPineconeClient();
 
     // handle all checks before the rate limiting so that we do not incorrectly update the users' rate counts when the file never actually uploaded.
     // harvest the formdata. expect file and name
@@ -231,6 +233,7 @@ export async function POST(req: NextRequest) {
       });
     }
     if (pinecone) {
+      const pc = getPineconeClient();
       const namespace = pc.index("docuquery", "https://docuquery-38emsw1.svc.aped-4627-b74a.pinecone.io").namespace(pinecone.namespace);
       await namespace.deleteMany({
         pdf_id: { $eq: pinecone.pdfId }

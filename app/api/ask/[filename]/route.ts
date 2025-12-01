@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "@/prisma/client";
-import { pc } from "@/utils/pinecone/client";
+import { getPineconeClient } from "@/utils/pinecone/client";
 import { gpt } from "@/utils/openai/client";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
@@ -16,6 +16,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
         { status: 401 },
       );
     const userId = session?.user?.id;
+
+    const pc = getPineconeClient();
 
     // first, we fetch the document they want to chat with
     const document = await prisma.document.findUnique({
@@ -72,6 +74,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fil
         { status: 401 },
       );
     const userId = session?.user?.id;
+
+    const pc = getPineconeClient();
 
     // check that their prompt does not exceed the limit of 175 chars
     if (prompt.length > 175) return NextResponse.json({ error: "Prompt exceeds max length of 175 characters. Please trim down the prompt and try again." }, { status: 413 });
