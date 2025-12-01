@@ -10,7 +10,7 @@ import { useState } from "react";
 import ErrorBanner from "@/components/global/error-banner";
 
 export default function Billing() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [localError, setLocalError] = useState(false);
   const [localErrorText, setLocalErrorText] = useState(

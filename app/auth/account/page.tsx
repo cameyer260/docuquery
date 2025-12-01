@@ -62,7 +62,7 @@ export default function AccountPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
-    const result = await response.json();
+    await response.json();
     if (response.ok) {
       // Auto-hide toast after 3 seconds and redirect
       setTimeout(() => {
