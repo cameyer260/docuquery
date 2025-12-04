@@ -201,7 +201,6 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error(error);
     const s3client = getS3Client();
-    const presignedUrlClient = getPresignedUrlClient();
 
     // if one upload fails, any of the successful uploads now need to be deleted. we can use these checkpoint variables that indicate which uploads happened and which did not
     // and the id/key of each upload to delete as well
