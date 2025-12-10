@@ -1,16 +1,17 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import next from "@next/eslint-plugin-next";
+import tseslint from "typescript-eslint";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+export default [
+  ...tseslint.configs.recommended,
+  {
+    plugins: {
+      "@next/next": next,
+    },
+    rules: {
+      ...next.configs["recommended"].rules,
+      ...next.configs["core-web-vitals"].rules,
+    },
+  },
   {
     ignores: [
       "node_modules/**",
@@ -21,5 +22,3 @@ const eslintConfig = [
     ],
   },
 ];
-
-export default eslintConfig;
