@@ -17,9 +17,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
       );
     const userId = session?.user?.id;
 
-    const pc = getPineconeClient();
-    const gpt = getGptClient();
-
     // first, we fetch the document they want to chat with
     const document = await prisma.document.findUnique({
       where: {
