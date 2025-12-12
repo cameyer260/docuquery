@@ -6,7 +6,7 @@ import { spawn } from "child_process";
  */
 export async function getPdfPreview(pdfBuffer: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const child = spawn('convert', [
+    const child = spawn('magick', [
       '-density', '150',
       'pdf:-[0]',           // Read PDF from stdin, first page only
       '-quality', '90',
