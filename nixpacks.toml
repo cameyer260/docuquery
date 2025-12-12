@@ -1,2 +1,2 @@
 [phases.setup]
-nixPkgs = ["imagemagick", "poppler"] # install binary dependencies our convert pdf to text buffer code relies on
+nixPkgs = ["nodejs", "imagemagick", "poppler_utils"] # install binary dependencies our convert pdf to text buffer code relies on
