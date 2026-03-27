@@ -22,17 +22,20 @@ export default function UserAccount({
 }) {
   return session ? (
     <div>
-      <DropdownMenu>
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="flex gap-2">
+          <Button
+            variant="outline"
+            className="h-10 rounded-full border-border/70 bg-background/80 px-3 shadow-sm"
+          >
             <Image
               src={session?.user ? String(session?.user?.image) : ""}
-              width="25"
-              height="25"
+              width="28"
+              height="28"
               alt=""
-              className="border-transparent rounded-full"
+              className="rounded-full border border-transparent"
             />
-            <h1>{session?.user?.name}</h1>
+            <span className="max-w-28 truncate text-sm">{session?.user?.name}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="start">

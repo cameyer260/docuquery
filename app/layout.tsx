@@ -41,9 +41,9 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <ClientLayout session={session}>
-            <Navbar />
-            <main className="flex flex-col flex-grow">{children}</main>
-            <Footer />
+            <Navbar session={session} />
+            <main className="flex min-h-0 flex-col flex-grow">{children}</main>
+            <Footer session={session} />
           </ClientLayout>
         </ThemeProvider>
       </body>

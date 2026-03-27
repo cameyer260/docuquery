@@ -18,7 +18,7 @@ export default function TitlePage({ title }: { title: string }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex h-[calc(100vh-128px)]"
+      className="flex min-h-0 flex-1"
     >
       <div className="w-64 flex-shrink-0">
         <LogsSidebar title={title} />
