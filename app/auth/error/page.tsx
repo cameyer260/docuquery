@@ -22,7 +22,7 @@ export default function SignInError() {
     " We have been notified and are working hard to fix it.";
 
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-128px)] p-4">
+    <div className="flex flex-1 items-center justify-center p-4 py-10">
       <div className="max-w-md w-full bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-lg p-6 border border-foreground/10 flex flex-col gap-4 text-center">
         <h1 className="text-2xl font-bold text-foreground/90">Sign-Up Error</h1>
         <p className="text-sm text-foreground/70">{displayError}</p>

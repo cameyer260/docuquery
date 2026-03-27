@@ -39,64 +39,123 @@ export default function Footer({ session }: { session: Session | null }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
       />
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-8 lg:py-12">
-        <div className="space-y-5">
-          <div className="space-y-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-3 text-lg font-semibold tracking-tight"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border/70 bg-background text-primary shadow-sm">
-                <FileSearch className="h-5 w-5" />
-              </span>
-              <span>DocuQuery</span>
-            </Link>
+      <div className="sm:hidden">
+        <div className="mx-auto max-w-7xl px-4 py-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-3 text-base font-semibold tracking-tight"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-2xl border border-border/70 bg-background text-primary shadow-sm">
+                  <FileSearch className="h-4 w-4" />
+                </span>
+                <span>DocuQuery</span>
+              </Link>
 
-            <p className="max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">
-              Trustworthy document Q&amp;A for readings, assignments, textbook
-              sections, and research PDFs. Ask focused questions, review the
-              returned source context, and verify before you rely on the answer.
+              <Link
+                href="https://christophermeyer.dev#contact"
+                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border/70 bg-background px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                Contact
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            <p className="text-sm leading-6 text-muted-foreground">
+              Grounded document Q&amp;A for readings, assignments, and research
+              PDFs.
             </p>
-          </div>
 
-          <Link
-            href="https://christophermeyer.dev#contact"
-            className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Contact
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
+            <div className="grid grid-cols-2 gap-5">
+              {footerSections.map((section) => (
+                <div key={section.title} className="space-y-2.5">
+                  <h2 className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                    {section.title}
+                  </h2>
+                  <div className="space-y-2">
+                    {section.links.map(({ href, label, icon: Icon }) => (
+                      <Link
+                        key={label}
+                        href={href}
+                        className="flex items-start gap-2 text-sm text-foreground/85 transition-colors hover:text-foreground"
+                      >
+                        <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                        <span className="leading-5">{label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2">
-          {footerSections.map((section) => (
-            <div key={section.title} className="space-y-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                {section.title}
-              </h2>
-              <div className="space-y-3">
-                {section.links.map(({ href, label, icon: Icon }) => (
-                  <Link
-                    key={label}
-                    href={href}
-                    className="flex items-center gap-3 text-sm text-foreground/85 transition-colors hover:text-foreground"
-                  >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/70 bg-background shadow-sm">
-                      <Icon className="h-4 w-4 text-primary" />
-                    </span>
-                    <span>{label}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
+        <div className="border-t border-border/70 px-4 py-3 text-sm text-muted-foreground">
+          <p>&copy; {year} DocuQuery</p>
         </div>
       </div>
 
-      <div className="border-t border-border/70">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm text-muted-foreground sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-          <p>&copy; {year} DocuQuery</p>
-          <p>Grounded answers from your documents, with source context.</p>
+      <div className="hidden sm:block">
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10 lg:px-8 lg:py-12">
+          <div className="space-y-4">
+            <div className="space-y-2.5">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-3 text-lg font-semibold tracking-tight"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-border/70 bg-background text-primary shadow-sm sm:h-10 sm:w-10">
+                  <FileSearch className="h-4 w-4 sm:h-5 sm:w-5" />
+                </span>
+                <span>DocuQuery</span>
+              </Link>
+
+              <p className="max-w-xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
+                Trustworthy document Q&amp;A for readings, assignments, textbook
+                sections, and research PDFs. Ask focused questions, review the
+                returned source context, and verify before you rely on the answer.
+              </p>
+            </div>
+
+            <Link
+              href="https://christophermeyer.dev#contact"
+              className="inline-flex h-9 items-center gap-2 rounded-full border border-border/70 bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Contact
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6 sm:gap-8">
+            {footerSections.map((section) => (
+              <div key={section.title} className="space-y-3">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  {section.title}
+                </h2>
+                <div className="space-y-2.5">
+                  {section.links.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      key={label}
+                      href={href}
+                      className="flex items-center gap-3 text-sm text-foreground/85 transition-colors hover:text-foreground"
+                    >
+                      <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/70 bg-background shadow-sm sm:h-9 sm:w-9">
+                        <Icon className="h-4 w-4 text-primary" />
+                      </span>
+                      <span className="leading-5">{label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-border/70">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm text-muted-foreground sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+            <p>&copy; {year} DocuQuery</p>
+            <p>Grounded answers from your documents, with source context.</p>
+          </div>
         </div>
       </div>
     </footer>

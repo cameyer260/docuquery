@@ -42,7 +42,7 @@ export default async function RootLayout({
         >
           <ClientLayout session={session}>
             <Navbar session={session} />
-            <main className="flex flex-col flex-grow">{children}</main>
+            <main className="flex min-h-0 flex-col flex-grow">{children}</main>
             <Footer session={session} />
           </ClientLayout>
         </ThemeProvider>

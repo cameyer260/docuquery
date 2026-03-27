@@ -30,7 +30,7 @@ export default function SignIn() {
     : null;
 
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-128px)] px-4">
+    <div className="flex flex-1 items-center justify-center px-4 py-10">
       <Card className="w-full max-w-sm border-border shadow-md">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="text-3xl font-semibold">Sign In</CardTitle>

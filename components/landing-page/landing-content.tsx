@@ -335,7 +335,10 @@ export default function LandingContent() {
         </motion.div>
       </section>
 
-      <section id="how-it-works" className="px-4 py-16 sm:px-6 lg:px-8">
+      <section
+        id="how-it-works"
+        className="scroll-mt-28 px-4 py-16 sm:scroll-mt-32 sm:px-6 lg:px-8"
+      >
         <motion.div
           variants={stagger}
           initial={false}
