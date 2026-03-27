@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Session } from "next-auth";
 import {
   ArrowUpRight,
   BookOpenText,
@@ -6,12 +7,8 @@ import {
   FileText,
   ShieldCheck,
 } from "lucide-react";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-export default async function Footer() {
-  const session = await getServerSession(authOptions);
+export default function Footer({ session }: { session: Session | null }) {
   const year = new Date().getFullYear();
   const footerSections = [
     {

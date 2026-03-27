@@ -1,14 +1,12 @@
 import Link from "next/link";
 import { FileSearch } from "lucide-react";
-import { getServerSession } from "next-auth/next";
+import type { Session } from "next-auth";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { ModeToggle } from "./mode-toggle";
 import UserAccount from "./user-account";
 import { Button } from "@/components/ui/button";
 
-export default async function Navbar() {
-  const session = await getServerSession(authOptions);
+export default function Navbar({ session }: { session: Session | null }) {
   const navLinks = session
     ? [
         { href: "/main/upload", label: "Upload" },

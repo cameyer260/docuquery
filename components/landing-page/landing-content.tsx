@@ -136,7 +136,7 @@ export default function LandingContent() {
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
           <motion.div
             variants={stagger}
-            initial="hidden"
+            initial={false}
             animate="show"
             className="max-w-2xl"
           >
@@ -191,7 +191,7 @@ export default function LandingContent() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: smoothEase, delay: 0.1 }}
             className="relative"
@@ -306,7 +306,7 @@ export default function LandingContent() {
       <section id="trustworthy" className="px-4 py-10 sm:px-6 lg:px-8">
         <motion.div
           variants={stagger}
-          initial="hidden"
+          initial={false}
           whileInView="show"
           viewport={{ once: true, amount: 0.25 }}
           className="mx-auto max-w-7xl"
@@ -338,7 +338,7 @@ export default function LandingContent() {
       <section id="how-it-works" className="px-4 py-16 sm:px-6 lg:px-8">
         <motion.div
           variants={stagger}
-          initial="hidden"
+          initial={false}
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
           className="mx-auto max-w-7xl"
@@ -386,7 +386,7 @@ export default function LandingContent() {
       <section className="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
         <motion.div
           variants={stagger}
-          initial="hidden"
+          initial={false}
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
           className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]"
@@ -423,7 +423,7 @@ export default function LandingContent() {
 
       <section className="px-4 py-16 sm:px-6 lg:px-8 lg:pt-20">
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.55, ease: smoothEase }}
