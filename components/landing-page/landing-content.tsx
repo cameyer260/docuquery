@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
@@ -23,19 +24,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-const fadeUp = {
+const smoothEase = [0.22, 1, 0.36, 1] as const;
+
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 18 },
   show: {
     opacity: 1,
     y: 0,
     transition: {
       duration: 0.55,
-      ease: [0.22, 1, 0.36, 1],
+      ease: smoothEase,
     },
   },
 };
 
-const stagger = {
+const stagger: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -190,7 +193,7 @@ export default function LandingContent() {
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            transition={{ duration: 0.7, ease: smoothEase, delay: 0.1 }}
             className="relative"
           >
             <div className="absolute -left-6 top-10 hidden h-28 w-28 rounded-full bg-primary/10 blur-3xl lg:block" />
@@ -423,7 +426,7 @@ export default function LandingContent() {
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.55, ease: smoothEase }}
           className="mx-auto max-w-5xl"
         >
           <Card className="overflow-hidden rounded-[32px] border-border/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(245,245,245,0.88))] py-0 shadow-[0_30px_80px_-36px_rgba(15,23,42,0.3)] dark:bg-[linear-gradient(135deg,rgba(38,38,38,0.94),rgba(23,23,23,0.94))]">
